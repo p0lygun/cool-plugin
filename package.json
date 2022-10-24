@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@types/jquery": "^3.5.14"
+  },
+  "dependencies": {
+    "blockly": "^9.0.1"
+  },
+  "scripts": {
+    "compile": "tsc --skipLibCheck main.ts"
+  }
+}
