@@ -12,15 +12,16 @@ const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b938
 // const variables end
 // helper functions start
 class Logger {
-    constructor (pluginName) {
+    constructor (pluginName = '', showPluginName = false) {
         this.pluginName = pluginName;
+        this.showPluginName = showPluginName;
     }
 
     fancyLog(message, color){
         if(!message){
             return
         }
-        console.log(`${(this.pluginName) ? this.pluginName : ''} : %c${message}`, `color: ${color}`)
+        console.log(`${this.showPluginName ? `${this.pluginName} : ` : ''}%c${message}`, `color: ${color}`)
     }
     info(message){
         this.fancyLog(message , '#26FFDF')
