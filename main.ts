@@ -153,6 +153,7 @@ function addleftPluginPane() {
         const documentRoot = $(':root')
         documentRoot.css('--leftPageMarginLeft', `${$('.blocklyToolboxDiv').width()}px`)
         documentRoot.css('--collapsed-rule-bg-image-url', `url(${BF2042SDK.getUrl('static/images/rule_collapsed_no_name.svg')})`)
+        documentRoot.css('--left-arrow-svg-url', `url(${BF2042SDK.getUrl('static/images/left_arrow.svg')})`)
         populateleftPagePlugins();
     })
 
