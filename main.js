@@ -22,6 +22,10 @@ function setBaseVars() {
             }
         }
     });
+    window.modBlock = modBlock,
+        window.listBlocksInModBlock = listBlocksInModBlock,
+        window.addPane = addleftPluginPane,
+        window.handelExperienceRulesListing = handelExperienceRulesListing;
 }
 class Logger {
     constructor(pluginName = '', showPluginName = false) {
@@ -89,7 +93,8 @@ function getRuleName(block) {
         return block.inputList[0].fieldRow[1].getValue();
 }
 function centerAndSelectBlock(block) {
-    block.select()(mainWorkspace).centerOnBlock(block.id);
+    block.select();
+    mainWorkspace.centerOnBlock(block.id);
 }
 function centerAndSelectBlockByID(id) {
     centerAndSelectBlock(mainWorkspace.getBlockById(id));
@@ -115,10 +120,14 @@ function handelExperienceRulesListing() {
     if (rulesListContaier.length) {
         rulesListContaier.children('.collapsedRule').remove();
         listBlocksInModBlock().forEach((block, index) => {
-            $('<div>', {
+            const ruleCollapsedBlock = $('<div>', {
                 class: 'collapsedRule',
-                "data-block-id": block.id
-            }).append($('<div>').text(index + 1)).append($('<div>').text(getRuleName(block))).appendTo(rulesListContaier);
+                "data-block-id": block.id,
+            }).append($('<div>').text(index + 1)).append($('<div>').text(getRuleName(block)));
+            ruleCollapsedBlock.on('click touch', function () {
+                centerAndSelectBlockByID(this.getAttribute("data-block-id"));
+            });
+            ruleCollapsedBlock.appendTo(rulesListContaier);
         });
     }
 }
@@ -165,9 +174,5 @@ function loadSubPlugins() {
         loadSubPlugins();
     }
 })();
-// loaders end
-window.modBlock = modBlock,
-    window.listBlocksInModBlock = listBlocksInModBlock,
-    window.addPane = addleftPluginPane,
-    window.handelExperienceRulesListing = handelExperienceRulesListing;
 export {};
+// loaders end

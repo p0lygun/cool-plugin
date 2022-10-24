@@ -53,7 +53,12 @@ function setBaseVars(){
                 handelExperienceRulesListing(); 
             }  
         }
-    })    
+    });
+    (window as any).modBlock = modBlock,
+    (window as any).listBlocksInModBlock = listBlocksInModBlock,
+    (window as any).addPane = addleftPluginPane,
+    (window as any).handelExperienceRulesListing = handelExperienceRulesListing
+
 }
 
 class Logger {
@@ -131,8 +136,8 @@ function getRuleName(block: BlocklyObject.Block): string {
         return block.inputList[0].fieldRow[1].getValue()
 }
 function centerAndSelectBlock(block: BlocklyObject.Block) {
-    (block as any).select()
-        (mainWorkspace as any).centerOnBlock(block.id)
+    (block as any).select();
+    (mainWorkspace as any).centerOnBlock(block.id);
 }
 function centerAndSelectBlockByID(id: string) {
     centerAndSelectBlock(mainWorkspace.getBlockById(id))
@@ -162,10 +167,16 @@ function handelExperienceRulesListing() {
     if (rulesListContaier.length) {
         rulesListContaier.children('.collapsedRule').remove()
         listBlocksInModBlock().forEach((block, index) => {
-            $('<div>', { 
+            const ruleCollapsedBlock = $('<div>', { 
                 class: 'collapsedRule',
-                "data-block-id": block.id
-            }).append($('<div>').text(index + 1)).append($('<div>').text(getRuleName(block))).appendTo(rulesListContaier)
+                "data-block-id": block.id,
+            }).append($('<div>').text(index + 1)).append($('<div>').text(getRuleName(block)))
+            
+            ruleCollapsedBlock.on('click touch',function(){
+                centerAndSelectBlockByID(this.getAttribute("data-block-id"))
+            })
+
+            ruleCollapsedBlock.appendTo(rulesListContaier)
         })
     }
 }
@@ -215,7 +226,3 @@ function loadSubPlugins() {
 
 })();
 // loaders end
-(window as any).modBlock = modBlock,
-    (window as any).listBlocksInModBlock = listBlocksInModBlock,
-    (window as any).addPane = addleftPluginPane,
-    (window as any).handelExperienceRulesListing = handelExperienceRulesListing
