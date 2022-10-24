@@ -7,7 +7,7 @@
 // jquery loader (this calls sub plugin loader)
 
 // declaring types start
-import type * as common  from 'blockly'
+import type * as common  from './node_modules/blockly/core/common.js'
 type BlocklyRuntime = typeof common
 interface manifestObject {
     id: string,
