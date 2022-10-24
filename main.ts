@@ -8,9 +8,7 @@
 
 // declaring types start
 import type * as BlocklyObject  from './node_modules/blockly/core/blockly.js'
-import { Abstract } from './node_modules/blockly/core/events/events_abstract.js'
 import { BlockMove } from './node_modules/blockly/core/events/events_block_move.js'
-import { append } from './node_modules/blockly/core/serialization/blocks.js'
 type BlocklyRuntime = typeof BlocklyObject
 interface manifestObject {
     id: string,
@@ -38,12 +36,13 @@ interface BF2042PortalRuntimeSDK {
 declare var BF2042Portal: BF2042PortalRuntimeSDK, _Blockly: BlocklyRuntime;
 
 // declaring types end
-// const variables start
+// variables declare start
 const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c'),
         Blockly = _Blockly,
         mainWorkspace = Blockly.getMainWorkspace(),
         modBlock = mainWorkspace.getAllBlocks(false)[0];
-// const variables end
+let isScreenSupported = true;
+// variables declare end
 // helper functions start
 
 class Logger {
@@ -73,11 +72,39 @@ class Logger {
 }
 const logger = new Logger(BF2042SDK.manifest.name);
 
+function mutationObserverWrapper(target: string| Node, callback:MutationCallback){
+    const observer = new MutationObserver(callback),
+        config = {
+            childList: true,
+            subtree: true
+        }
+        observer.observe(typeof target === 'string' ? $(target)[0] : target , config)
+}
+
+function waitForElm(selector: string) {
+    return new Promise(resolve => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector));
+        }
+
+        const observer = new MutationObserver(mutations => {
+            if (document.querySelector(selector)) {
+                resolve(document.querySelector(selector));
+                observer.disconnect();
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+}
+
+
 function showStartupBanner(){
     logger.info("\r\n\r\n   _____            _   _____  _             _           \r\n  \/ ____|          | | |  __ \\| |           (_)          \r\n | |     ___   ___ | | | |__) | |_   _  __ _ _ _ __  ___ \r\n | |    \/ _ \\ \/ _ \\| | |  ___\/| | | | |\/ _` | | \'_ \\\/ __|\r\n | |___| (_) | (_) | | | |    | | |_| | (_| | | | | \\__ \\\r\n  \\_____\\___\/ \\___\/|_| |_|    |_|\\__,_|\\__, |_|_| |_|___\/\r\n                                        __\/ |            \r\n                                       |___\/             \r\n\n              Adding spice to your logic editor")
 }
-// helper functions ends
-// sub plugins start
 function listBlocksInModBlock(): BlocklyObject.Block[]{
     const blocks = []
     let currChild = modBlock.getChildren(false)[0]
@@ -91,22 +118,51 @@ function listBlocksInModBlock(): BlocklyObject.Block[]{
     return blocks
 }
 
-
+// helper functions ends
+// sub plugins start
+function addleftPluginPane(){
+    const div = $('<div></div>').load(BF2042SDK.getUrl('html/leftPluginPane.html'), function (){
+        $('.blocklyScrollbarHorizontal').after(div.html())
+    })
+    
+    waitForElm('#leftPluginPage').then(function (elem) {
+        $(':root').css('--leftPageMarginLeft', `${$('.blocklyToolboxDiv').width()}px`)
+    })
+    
+}
 
 modBlock.setOnChange(function (event: BlockMove) {
     if(event.newParentId && event.type == Blockly.Events.BLOCK_MOVE){
-        if(mainWorkspace.getBlockById(event.blockId).type == "ruleBlock")
+        if(mainWorkspace.getBlockById(event.blockId).type === "ruleBlock")
             listBlocksInModBlock();
     }
-    
 })
+
+function main(){
+    mutationObserverWrapper('app-rules', function (mutationList, observer){
+        for(const mutation of mutationList){
+            if(mutation.type === 'childList'){
+                if(document.getElementsByClassName('not-supported').length){ // required to build dynamic html again as DOM is recreated
+                    isScreenSupported = false;
+                } else {
+                    if(!isScreenSupported){
+                        addleftPluginPane();
+                        isScreenSupported = true;
+                    }
+                }
+            }
+        }
+    })
+}
+
 
 // sub plugins end
 // loaders start
 function loadSubPlugins(){
     showStartupBanner();
-    listBlocksInModBlock();
-    logger.info("coolness loaded");
+    addleftPluginPane();
+    logger.info("coolness loaded");    
+    main();
 }
 (function () {
     // Load the script
@@ -126,4 +182,5 @@ function loadSubPlugins(){
 })();
 // loaders end
 (window as any).modBlock = modBlock,
-(window as any).listBlocksInModBlock = listBlocksInModBlock
+(window as any).listBlocksInModBlock = listBlocksInModBlock,
+(window as any).addPane = addleftPluginPane
