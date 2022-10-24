@@ -7,8 +7,11 @@
 // jquery loader (this calls sub plugin loader)
 
 // declaring types start
-import type * as common  from './node_modules/blockly/core/common.js'
-type BlocklyRuntime = typeof common
+import type * as BlocklyObject  from './node_modules/blockly/core/blockly.js'
+import { Abstract } from './node_modules/blockly/core/events/events_abstract.js'
+import { BlockMove } from './node_modules/blockly/core/events/events_block_move.js'
+import { append } from './node_modules/blockly/core/serialization/blocks.js'
+type BlocklyRuntime = typeof BlocklyObject
 interface manifestObject {
     id: string,
     name: string,
@@ -38,9 +41,11 @@ declare var BF2042Portal: BF2042PortalRuntimeSDK, _Blockly: BlocklyRuntime;
 // const variables start
 const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c'),
         Blockly = _Blockly,
-        mainWorkspace = Blockly.getMainWorkspace();
+        mainWorkspace = Blockly.getMainWorkspace(),
+        modBlock = mainWorkspace.getAllBlocks(false)[0];
 // const variables end
 // helper functions start
+
 class Logger {
     pluginName: string;
     showPluginName: boolean
@@ -73,16 +78,34 @@ function showStartupBanner(){
 }
 // helper functions ends
 // sub plugins start
-function listBlocks(){
-    mainWorkspace.getAllBlocks(false).slice(1).forEach((block: any,index: number) => {
-        console.log(`${index} ${block.inputList[0].fieldRow[1].getValue()}`)
-    });
+function listBlocksInModBlock(): BlocklyObject.Block[]{
+    const blocks = []
+    let currChild = modBlock.getChildren(false)[0]
+    while(currChild){
+        blocks.push(currChild)
+        currChild = currChild.getChildren(false)[0]
+    }
+    // blocks.forEach((block) => {
+    //     console.log(block.inputList[0].fieldRow[1].getValue())
+    // })
+    return blocks
 }
+
+
+
+modBlock.setOnChange(function (event: BlockMove) {
+    if(event.newParentId && event.type == Blockly.Events.BLOCK_MOVE){
+        if(mainWorkspace.getBlockById(event.blockId).type == "ruleBlock")
+            listBlocksInModBlock();
+    }
+    
+})
+
 // sub plugins end
 // loaders start
 function loadSubPlugins(){
     showStartupBanner();
-    listBlocks();
+    listBlocksInModBlock();
     logger.info("coolness loaded");
 }
 (function () {
@@ -102,3 +125,5 @@ function loadSubPlugins(){
 
 })();
 // loaders end
+(window as any).modBlock = modBlock,
+(window as any).listBlocksInModBlock = listBlocksInModBlock
