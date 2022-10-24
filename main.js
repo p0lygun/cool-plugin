@@ -40,6 +40,9 @@ function mutationObserverWrapper(target, callback) {
     };
     observer.observe(typeof target === 'string' ? $(target)[0] : target, config);
 }
+function showStartupBanner() {
+    logger.info("\r\n\r\n   _____            _   _____  _             _           \r\n  \/ ____|          | | |  __ \\| |           (_)          \r\n | |     ___   ___ | | | |__) | |_   _  __ _ _ _ __  ___ \r\n | |    \/ _ \\ \/ _ \\| | |  ___\/| | | | |\/ _` | | \'_ \\\/ __|\r\n | |___| (_) | (_) | | | |    | | |_| | (_| | | | | \\__ \\\r\n  \\_____\\___\/ \\___\/|_| |_|    |_|\\__,_|\\__, |_|_| |_|___\/\r\n                                        __\/ |            \r\n                                       |___\/             \r\n\n              Adding spice to your logic editor");
+}
 function waitForElm(selector) {
     return new Promise(resolve => {
         if (document.querySelector(selector)) {
@@ -57,9 +60,6 @@ function waitForElm(selector) {
         });
     });
 }
-function showStartupBanner() {
-    logger.info("\r\n\r\n   _____            _   _____  _             _           \r\n  \/ ____|          | | |  __ \\| |           (_)          \r\n | |     ___   ___ | | | |__) | |_   _  __ _ _ _ __  ___ \r\n | |    \/ _ \\ \/ _ \\| | |  ___\/| | | | |\/ _` | | \'_ \\\/ __|\r\n | |___| (_) | (_) | | | |    | | |_| | (_| | | | | \\__ \\\r\n  \\_____\\___\/ \\___\/|_| |_|    |_|\\__,_|\\__, |_|_| |_|___\/\r\n                                        __\/ |            \r\n                                       |___\/             \r\n\n              Adding spice to your logic editor");
-}
 function listBlocksInModBlock() {
     const blocks = [];
     let currChild = modBlock.getChildren(false)[0];
@@ -72,6 +72,16 @@ function listBlocksInModBlock() {
     // })
     return blocks;
 }
+function getRuleName(block) {
+    if (block.type === 'ruleBlock')
+        return block.inputList[0].fieldRow[1].getValue();
+}
+function centerAndSelectBlock(block) {
+    block.select()(mainWorkspace).centerOnBlock(block.id);
+}
+function centerAndSelectBlockByID(id) {
+    centerAndSelectBlock(mainWorkspace.getBlockById(id));
+}
 // helper functions ends
 // sub plugins start
 function addleftPluginPane() {
@@ -79,13 +89,33 @@ function addleftPluginPane() {
         $('.blocklyScrollbarHorizontal').after(div.html());
     });
     waitForElm('#leftPluginPage').then(function (elem) {
-        $(':root').css('--leftPageMarginLeft', `${$('.blocklyToolboxDiv').width()}px`);
+        const documentRoot = $(':root');
+        documentRoot.css('--leftPageMarginLeft', `${$('.blocklyToolboxDiv').width()}px`);
+        documentRoot.css('--collapsed-rule-bg-image-url', `url(${BF2042SDK.getUrl('static/images/rule_collapsed_no_name.svg')})`);
+        populateleftPagePlugins();
     });
 }
+function populateleftPagePlugins() {
+    handelExperienceRulesListing();
+}
+function handelExperienceRulesListing() {
+    const rulesListContaier = $('.collapsedRuleContainer');
+    if (rulesListContaier.length) {
+        rulesListContaier.children('.collapsedRule').remove();
+        listBlocksInModBlock().forEach((block, index) => {
+            $('<div>', {
+                class: 'collapsedRule',
+                "data-block-id": block.id
+            }).append($('<div>').text(index + 1)).append($('<div>').text(getRuleName(block))).appendTo(rulesListContaier);
+        });
+    }
+}
 modBlock.setOnChange(function (event) {
-    if (event.newParentId && event.type == Blockly.Events.BLOCK_MOVE) {
-        if (mainWorkspace.getBlockById(event.blockId).type === "ruleBlock")
-            listBlocksInModBlock();
+    if (event.type == Blockly.Events.BLOCK_MOVE) {
+        const block = mainWorkspace.getBlockById(event.blockId), modBlockChild = modBlock.getChildren(false);
+        if (block.type === "ruleBlock") {
+            handelExperienceRulesListing();
+        }
     }
 });
 function main() {
@@ -132,5 +162,6 @@ function loadSubPlugins() {
 // loaders end
 window.modBlock = modBlock,
     window.listBlocksInModBlock = listBlocksInModBlock,
-    window.addPane = addleftPluginPane;
+    window.addPane = addleftPluginPane,
+    window.handelExperienceRulesListing = handelExperienceRulesListing;
 export {};

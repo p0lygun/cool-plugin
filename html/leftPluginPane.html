@@ -1,9 +1,13 @@
 <style>
     :root {
-        --leftPageMarginLeft: 0px
+        --leftPageMarginLeft: 0px;
+        --collapsed-rule-bg-image-url: '';
     }
     .leftPluginPageContainer {
-        width: 200px;height: 100%;
+        width: 210px;
+        height: 100%;
+        padding-left: 5px;
+        padding-right: 5px;
         background-color: #182021;
         margin-left: var(--leftPageMarginLeft);
         position: absolute;
@@ -13,25 +17,57 @@
         position: relative;
         display: flex;
         flex-direction: column;
+        align-items: center;
+        row-gap: 10px;
         width: 100%;
         height: 100%;
     }
     #leftPanecolaspeButton {
         position: absolute;
-        right: 0;
+        left: 205px;
         top: 0;
         width: 20px;
-        height: 20px;
-        background-color: black;
+        height: 30px;
+        background-color: blanchedalmond;
     }
+    .collapsedRuleContainer {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        row-gap: 5px;
+        margin-top: 15px;
+    }
+    .collapsedRule {
+        background-image: var(--collapsed-rule-bg-image-url);
+        background-size: cover;
+        background-repeat: no-repeat;
+        display: flex;
+        flex-direction: row;
+        width: 95%;
+        height: 45px;
+        margin: 0;
+        padding-left: 17px;
+        align-items: center;
+        column-gap: 20px;
+    }   
 </style>
 <div class="leftPluginPageContainer blocklyNonSelectable">
     <div id="leftPluginPage">
         <div id="leftPanecolaspeButton"></div>
-        <div>Test 1</div>
-        <div>Test 2</div>
-        <div>Test 3</div>
-        <div>Test 4</div>
-        <div>Test 5</div>
+        <div class="collapsedRuleContainer">
+            <div>Experience Rules List</div>
+            <!-- <div class="collapsedRule">
+                <div>
+                    1
+                </div>
+                <div>
+                    Rule
+                </div>
+            </div>
+            <div class="collapsedRule"></div>
+            <div class="collapsedRule"></div>
+            <div class="collapsedRule"></div>
+            <div class="collapsedRule"></div> -->
+        </div>
     </div>
 </div>
