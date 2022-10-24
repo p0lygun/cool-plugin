@@ -46,7 +46,7 @@ let Blockly: BlocklyRuntime, mainWorkspace: BlocklyObject.Workspace, modBlock: B
 function setBaseVars(){
     Blockly = _Blockly,
     mainWorkspace = Blockly.getMainWorkspace(),
-    modBlock = mainWorkspace.getAllBlocks(false)[0]; 
+    modBlock = _Blockly.getMainWorkspace().getBlocksByType('modBlock', false)[0];
     modBlock.setOnChange(function (event: BlockMove) {
         if (event.type == Blockly.Events.BLOCK_MOVE) {
             if (mainWorkspace.getBlockById(event.blockId).type === "ruleBlock"){ 
@@ -121,10 +121,12 @@ function waitForElm(selector: string) {
 }
 function listBlocksInModBlock(): BlocklyObject.Block[] {
     const blocks = []
-    let currChild = modBlock.getChildren(false)[0]
-    while (currChild) {
-        blocks.push(currChild)
-        currChild = currChild.getChildren(false)[0]
+    for(const block of mainWorkspace.getBlocksByType('ruleBlock', false) ){
+        const topParent = block.getTopStackBlock().getParent();
+
+        if(topParent && topParent.id === modBlock.id){
+            blocks.push(block)
+        }
     }
     // blocks.forEach((block) => {
     //     console.log(block.inputList[0].fieldRow[1].getValue())
@@ -137,7 +139,10 @@ function getRuleName(block: BlocklyObject.Block): string {
 }
 function centerAndSelectBlock(block: BlocklyObject.Block) {
     (block as any).select();
-    (mainWorkspace as any).centerOnBlock(block.id);
+    var mWs = (mainWorkspace as any)
+    var xy = block.getRelativeToSurfaceXY();	// Scroll the workspace so that the block's top left corner
+    var m = mWs.getMetrics();					// is in the (0.2; 0.3) part of the viewport.
+    mWs.scrollbar.set( xy.x * mWs.scale - m.contentLeft - m.viewWidth, xy.y * mWs.scale - m.contentTop  - m.viewHeight * 0.1);
 }
 function centerAndSelectBlockByID(id: string) {
     centerAndSelectBlock(mainWorkspace.getBlockById(id))
