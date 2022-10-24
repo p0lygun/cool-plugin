@@ -12,7 +12,7 @@
         background-color: #182021;
         margin-left: var(--leftPageMarginLeft);
         position: absolute;
-        display: block;
+        display: none;
     }
     #leftPluginPage {
         position: relative;
@@ -50,13 +50,19 @@
     .open {
         transform: rotate(180deg);
     }
+    .collapsedRuleOuterContainer{
+        margin-top: 15px;
+        overflow-y: scroll;
+        flex-direction: column;
+        row-gap: 5px;
+        width: 100%;
+    }
     .collapsedRuleContainer {
         display: flex;
         flex-direction: column;
-        width: 100%;
         row-gap: 5px;
-        margin-top: 15px;
     }
+
     .collapsedRule {
         background-image: var(--collapsed-rule-bg-image-url);
         background-size: cover;
@@ -82,7 +88,7 @@
         margin-left: var(--leftPageMarginLeft);
         width: 26px;
         height: 32px;
-        display: none;
+        display: block;
         background-color: #182021;
     }
     .leftPaneOpenIcon {
@@ -98,8 +104,11 @@
             <div id="leftPanecolaspeButton" onclick="toggleleftPane()">
                 <div class="iconclose close"></div>
             </div>
-            <div class="collapsedRuleContainer">
+            <div class="collapsedRuleOuterContainer">
                 <div>Experience Rules List</div>
+                <div class="collapsedRuleContainer">
+
+                </div>
                 <!-- <div class="collapsedRule">
                     <div> 1 </div> 
                     <div> Rule </div>
