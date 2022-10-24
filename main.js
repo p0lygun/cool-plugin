@@ -7,10 +7,22 @@
 // jquery loader (this calls sub plugin loader)
 // declaring types end
 // variables declare start
-const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c'), Blockly = _Blockly, mainWorkspace = Blockly.getMainWorkspace(), modBlock = mainWorkspace.getAllBlocks(false)[0];
-let isScreenSupported = true;
+const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c');
+let Blockly, mainWorkspace, modBlock, isScreenSupported = true;
 // variables declare end
 // helper functions start
+function setBaseVars() {
+    Blockly = _Blockly,
+        mainWorkspace = Blockly.getMainWorkspace(),
+        modBlock = mainWorkspace.getAllBlocks(false)[0];
+    modBlock.setOnChange(function (event) {
+        if (event.type == Blockly.Events.BLOCK_MOVE) {
+            if (mainWorkspace.getBlockById(event.blockId).type === "ruleBlock") {
+                handelExperienceRulesListing();
+            }
+        }
+    });
+}
 class Logger {
     constructor(pluginName = '', showPluginName = false) {
         this.pluginName = pluginName;
@@ -110,26 +122,19 @@ function handelExperienceRulesListing() {
         });
     }
 }
-modBlock.setOnChange(function (event) {
-    if (event.type == Blockly.Events.BLOCK_MOVE) {
-        const block = mainWorkspace.getBlockById(event.blockId), modBlockChild = modBlock.getChildren(false);
-        if (block.type === "ruleBlock") {
-            handelExperienceRulesListing();
-        }
-    }
-});
 function main() {
     mutationObserverWrapper('app-rules', function (mutationList, observer) {
         for (const mutation of mutationList) {
             if (mutation.type === 'childList') {
-                if (document.getElementsByClassName('not-supported').length) { // required to build dynamic html again as DOM is recreated
-                    isScreenSupported = false;
-                }
-                else {
+                if (document.getElementsByTagName('app-blockly').length) { // required to build dynamic html again as DOM is recreated
                     if (!isScreenSupported) {
+                        setBaseVars();
                         addleftPluginPane();
                         isScreenSupported = true;
                     }
+                }
+                else {
+                    isScreenSupported = false;
                 }
             }
         }
@@ -138,6 +143,7 @@ function main() {
 // sub plugins end
 // loaders start
 function loadSubPlugins() {
+    setBaseVars();
     showStartupBanner();
     addleftPluginPane();
     logger.info("coolness loaded");
