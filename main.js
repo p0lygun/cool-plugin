@@ -5,6 +5,15 @@
 // Sub-Plugins
 // SubPlugin Loader
 // jquery loader (this calls sub plugin loader)
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 // declaring types end
 // variables declare start
 const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c');
@@ -77,17 +86,15 @@ function waitForElm(selector) {
     });
 }
 function listBlocksInModBlock() {
-    const blocks = [];
-    for (const block of mainWorkspace.getBlocksByType('ruleBlock', false)) {
-        const topParent = block.getTopStackBlock().getParent();
-        if (topParent && topParent.id === modBlock.id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const blocks = [];
+        let block = modBlock.getChildren(false)[0];
+        while (block) {
             blocks.push(block);
+            block = block.nextConnection.targetBlock();
         }
-    }
-    // blocks.forEach((block) => {
-    //     console.log(block.inputList[0].fieldRow[1].getValue())
-    // })
-    return blocks;
+        return blocks;
+    });
 }
 function getRuleName(block) {
     if (block.type === 'ruleBlock')
@@ -106,7 +113,7 @@ function centerAndSelectBlockByID(id) {
 // helper functions ends
 // sub plugins start
 function addleftPluginPane() {
-    const div = $('<div></div>').load(BF2042SDK.getUrl('html/leftPluginPane.html'), function () {
+    const div = $('<div></div>').load('https://stilllearning.tech/cool-plugin/html/leftPluginPane.html', function () {
         $('.blocklyScrollbarHorizontal').after(div.html());
     });
     waitForElm('#leftPluginPage').then(function (elem) {
@@ -124,15 +131,17 @@ function handelExperienceRulesListing() {
     const rulesListContaier = $('.collapsedRuleContainer');
     if (rulesListContaier.length) {
         rulesListContaier.children('.collapsedRule').remove();
-        listBlocksInModBlock().forEach((block, index) => {
-            const ruleCollapsedBlock = $('<div>', {
-                class: 'collapsedRule',
-                "data-block-id": block.id,
-            }).append($('<div>').text(index + 1)).append($('<div>').text(getRuleName(block)));
-            ruleCollapsedBlock.on('click touch', function () {
-                centerAndSelectBlockByID(this.getAttribute("data-block-id"));
+        listBlocksInModBlock().then(blocks => {
+            blocks.forEach((block, index) => {
+                const ruleCollapsedBlock = $('<div>', {
+                    class: 'collapsedRule',
+                    "data-block-id": block.id,
+                }).append($('<div>').text(index + 1)).append($('<div>').text(getRuleName(block)));
+                ruleCollapsedBlock.on('click touch', function () {
+                    centerAndSelectBlockByID(this.getAttribute("data-block-id"));
+                });
+                ruleCollapsedBlock.appendTo(rulesListContaier);
             });
-            ruleCollapsedBlock.appendTo(rulesListContaier);
         });
     }
 }

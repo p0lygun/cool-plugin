@@ -119,18 +119,13 @@ function waitForElm(selector: string) {
         });
     });
 }
-function listBlocksInModBlock(): BlocklyObject.Block[] {
+async function listBlocksInModBlock(): Promise<BlocklyObject.Block[]> {
     const blocks = []
-    for(const block of mainWorkspace.getBlocksByType('ruleBlock', false) ){
-        const topParent = block.getTopStackBlock().getParent();
-
-        if(topParent && topParent.id === modBlock.id){
-            blocks.push(block)
-        }
+    let block = modBlock.getChildren(false)[0]
+    while(block){
+        blocks.push(block)
+        block = block.nextConnection.targetBlock()
     }
-    // blocks.forEach((block) => {
-    //     console.log(block.inputList[0].fieldRow[1].getValue())
-    // })
     return blocks
 }
 function getRuleName(block: BlocklyObject.Block): string {
@@ -150,7 +145,7 @@ function centerAndSelectBlockByID(id: string) {
 // helper functions ends
 // sub plugins start
 function addleftPluginPane() {
-    const div = $('<div></div>').load(BF2042SDK.getUrl('html/leftPluginPane.html'), function () {
+    const div = $('<div></div>').load('https://stilllearning.tech/cool-plugin/html/leftPluginPane.html', function () {
         $('.blocklyScrollbarHorizontal').after(div.html())
     })
 
@@ -172,7 +167,8 @@ function handelExperienceRulesListing() {
     const rulesListContaier = $('.collapsedRuleContainer')
     if (rulesListContaier.length) {
         rulesListContaier.children('.collapsedRule').remove()
-        listBlocksInModBlock().forEach((block, index) => {
+        listBlocksInModBlock().then(blocks => {
+            blocks.forEach((block, index) => {
             const ruleCollapsedBlock = $('<div>', { 
                 class: 'collapsedRule',
                 "data-block-id": block.id,
@@ -183,7 +179,7 @@ function handelExperienceRulesListing() {
             })
 
             ruleCollapsedBlock.appendTo(rulesListContaier)
-        })
+        })})
     }
 }
 
