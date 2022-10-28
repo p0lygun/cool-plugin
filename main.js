@@ -138,7 +138,7 @@ function populateleftPagePlugins() {
     handelExperienceRulesListing();
 }
 function handelExperienceRulesListing() {
-    const rulesListContaier = $('.collapsedRuleContainer');
+    const rulesListContaier = $('.collapsedRuleInnerContainer');
     if (rulesListContaier.length) {
         listBlocksInModBlock().then(blocks => {
             rulesListContaier.children('.collapsedRule').remove();
