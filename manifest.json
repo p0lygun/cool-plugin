@@ -5,5 +5,5 @@
     "description": "A Plugin that makes your logic editor cool",
     "author": "gala",
     "homepage": "https://github.com/p0lygun/cool-plugin",
-    "main": "/loader.js"
+    "main": "dist/loader.js"
 }

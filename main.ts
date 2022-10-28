@@ -9,6 +9,7 @@
 // declaring types start
 import type * as BlocklyObject from './node_modules/blockly/core/blockly.js'
 import { BlockMove } from './node_modules/blockly/core/events/events_block_move.js'
+import { CommunityGamesClient, communitygames } from 'bfportal-grpc';
 type BlocklyRuntime = typeof BlocklyObject
 interface manifestObject {
     id: string,
@@ -89,11 +90,31 @@ function setBaseVars(){
     });
     (window as any).modBlock = modBlock,
     (window as any).allBlocks = allBlocks,
+    (window as any).testGRPC = testGRPC,
     (window as any).listBlocksInModBlock = listBlocksInModBlock,
     (window as any).addPane = addleftPluginPane,
     (window as any).handelExperienceRulesListing = handelExperienceRulesListing
 
 
+}
+async function testGRPC(){
+    const communityGames = new CommunityGamesClient('https://kingston-prod-wgw-envoy.ops.dice.se', null);
+    const metadata = {
+        'x-dice-tenancy': 'prod_default-prod_default-kingston-common',
+        'x-gateway-session-id': '', //todo: read from cookies
+        'x-grpc-web': '1',
+        'x-user-agent': 'grpc-web-javascript/0.1',
+    }
+    
+    const request = new communitygames.GetPlaygroundRequest();
+    request.setPlaygroundid('0e2c9870-509b-11ed-af10-d3b271b3fd0a');
+    const response = await communityGames.getPlayground(request, metadata);
+    const modRules = response.getPlayground()?.getOriginalplayground()?.getModrules()?.getCompatiblerules()?.getRules();
+    if (modRules instanceof Uint8Array) {
+        console.log(new TextDecoder().decode(modRules))
+    }
+    const playgroundName = response.getPlayground()?.getOriginalplayground()?.getName
+    console.log(playgroundName);
 }
 class Logger {
     pluginName: string;
