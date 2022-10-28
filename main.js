@@ -113,7 +113,7 @@ function centerAndSelectBlockByID(id) {
 // helper functions ends
 // sub plugins start
 function addleftPluginPane() {
-    const div = $('<div></div>').load('https://stilllearning.tech/cool-plugin/html/leftPluginPane.html', function () {
+    const div = $('<div></div>').load(BF2042SDK.getUrl('html/leftPluginPane.html'), function () {
         $('.blocklyScrollbarHorizontal').after(div.html());
     });
     waitForElm('#leftPluginPage').then(function (elem) {
