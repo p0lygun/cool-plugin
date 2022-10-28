@@ -10,6 +10,7 @@ export default defineConfig({
       mangle: true
     },
     rollupOptions: {
+      chunkSizeWarningLimit: 600,
       input: [
         resolve(__dirname, 'main.ts'),
       ],
@@ -18,6 +19,7 @@ export default defineConfig({
         preserveModules:  false
       }
     },
+    chunkSizeWarningLimit: 600
   },
   plugins:[
     copy({
