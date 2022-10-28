@@ -5,25 +5,34 @@
 // Sub-Plugins
 // SubPlugin Loader
 // jquery loader (this calls sub plugin loader)
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 // declaring types end
 // variables declare start
 const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c');
-let Blockly, mainWorkspace, modBlock, isScreenSupported = true;
+let Blockly, mainWorkspace, modBlock, allBlocks = {}, isScreenSupported = true;
 // variables declare end
 // helper functions start
 function setBaseVars() {
+    logger.info('Setting Base Varialbes...');
     Blockly = _Blockly,
         mainWorkspace = Blockly.getMainWorkspace(),
-        modBlock = _Blockly.getMainWorkspace().getBlocksByType('modBlock', false)[0];
+        modBlock = _Blockly.getMainWorkspace().getBlocksByType('modBlock', false)[0],
+        allBlocks = {};
+    mainWorkspace.getToolbox().toolboxDef_.contents.forEach(element => {
+        if (element.kind === "SEP" || ["SEARCH RESULTS", "VARIABLES", "SUBROUTINES", "CONTROL ACTIONS"].includes(element.name)) {
+            return;
+        }
+        element.contents.forEach((block) => {
+            if (block.kind === "LABEL") {
+                return;
+            }
+            if (!(element.name in allBlocks)) {
+                allBlocks[element.name] = [block];
+            }
+            else {
+                allBlocks[element.name].push(block);
+            }
+        });
+    });
     modBlock.setOnChange(function (event) {
         if (event.type == Blockly.Events.BLOCK_MOVE) {
             if (mainWorkspace.getBlockById(event.blockId).type === "ruleBlock") {
@@ -32,6 +41,7 @@ function setBaseVars() {
         }
     });
     window.modBlock = modBlock,
+        window.allBlocks = allBlocks,
         window.listBlocksInModBlock = listBlocksInModBlock,
         window.addPane = addleftPluginPane,
         window.handelExperienceRulesListing = handelExperienceRulesListing;
@@ -85,16 +95,14 @@ function waitForElm(selector) {
         });
     });
 }
-function listBlocksInModBlock() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const blocks = [];
-        let block = modBlock.getChildren(false)[0];
-        while (block) {
-            blocks.push(block);
-            block = block.nextConnection.targetBlock();
-        }
-        return blocks;
-    });
+async function listBlocksInModBlock() {
+    const blocks = [];
+    let block = modBlock.getChildren(false)[0];
+    while (block) {
+        blocks.push(block);
+        block = block.nextConnection.targetBlock();
+    }
+    return blocks;
 }
 function getRuleName(block) {
     if (block.type === 'ruleBlock')
@@ -113,6 +121,7 @@ function centerAndSelectBlockByID(id) {
 // helper functions ends
 // sub plugins start
 function addleftPluginPane() {
+    logger.info('Adding left plugin pannel');
     const div = $('<div></div>').load(BF2042SDK.getUrl('html/leftPluginPane.html'), function () {
         $('.blocklyScrollbarHorizontal').after(div.html());
     });
@@ -125,6 +134,7 @@ function addleftPluginPane() {
     });
 }
 function populateleftPagePlugins() {
+    logger.info('Starting Rules list plugin...');
     handelExperienceRulesListing();
 }
 function handelExperienceRulesListing() {
@@ -145,14 +155,54 @@ function handelExperienceRulesListing() {
         });
     }
 }
+function searchWithCategoryPlugin() {
+    logger.info('loading searchWithCategory plugin....');
+    $('input.searchbar').remove().clone().appendTo('span.searchbarspan').on('keyup', function (event) {
+        setTimeout(function () {
+            const ToolBox = mainWorkspace.getToolbox();
+            const result = ToolBox.getToolboxItems()[0];
+            const input = $('input.searchbar').val().trim();
+            if (input.length) {
+                let flyoutContent = [], tempFlyoutContent = [];
+                for (const [key, blocks] of Object.entries(allBlocks)) {
+                    tempFlyoutContent = [];
+                    const label = {
+                        kind: "LABEL",
+                        text: key
+                    };
+                    tempFlyoutContent.push(label);
+                    blocks.forEach(block => {
+                        if (block.displayName.toLowerCase().includes(input.toLowerCase())) {
+                            tempFlyoutContent.push(block);
+                        }
+                    });
+                    if (tempFlyoutContent.length > 1) {
+                        flyoutContent = flyoutContent.concat(tempFlyoutContent);
+                    }
+                }
+                result.updateFlyoutContents(flyoutContent);
+                result.show();
+                ToolBox.setSelectedItem(result);
+            }
+            else {
+                result.hide();
+            }
+        }), 100;
+    });
+}
+function reloadPlugins() {
+    logger.warn('DOM recreated.... reloading plugins...');
+    setBaseVars();
+    addleftPluginPane();
+    searchWithCategoryPlugin();
+}
 function main() {
     mutationObserverWrapper('app-rules', function (mutationList, observer) {
         for (const mutation of mutationList) {
             if (mutation.type === 'childList') {
                 if (document.getElementsByTagName('app-blockly').length) { // required to build dynamic html again as DOM is recreated
                     if (!isScreenSupported) {
-                        setBaseVars();
-                        addleftPluginPane();
+                        reloadPlugins();
                         isScreenSupported = true;
                     }
                 }
@@ -170,7 +220,9 @@ function loadSubPlugins() {
     showStartupBanner();
     addleftPluginPane();
     logger.info("coolness loaded");
+    searchWithCategoryPlugin();
     main();
+    window.cool_plugin_loaded = true;
 }
 (function () {
     // Load the script

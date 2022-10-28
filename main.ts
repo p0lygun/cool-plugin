@@ -19,7 +19,6 @@ interface manifestObject {
     homepage: string,
     main: string
 }
-
 interface PluginInfo {
     baseUrl: string,
     manifest: manifestObject,
@@ -32,6 +31,17 @@ interface PluginObject {
 interface BF2042PortalRuntimeSDK {
     Plugins: PluginObject
 }
+type ToolBoxBlockItem = {
+    blockxml: XMLDocument,
+    displayName: string,
+    kind: string,
+    type: string;
+}
+
+type FlyoutSectionLabel = {
+    kind: string,
+    text: string
+}
 
 declare var BF2042Portal: BF2042PortalRuntimeSDK, _Blockly: BlocklyRuntime;
 
@@ -39,14 +49,37 @@ declare var BF2042Portal: BF2042PortalRuntimeSDK, _Blockly: BlocklyRuntime;
 // variables declare start
 const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c');
 
-let Blockly: BlocklyRuntime, mainWorkspace: BlocklyObject.Workspace, modBlock: BlocklyObject.Block, isScreenSupported = true;
+let Blockly: BlocklyRuntime, 
+    mainWorkspace: BlocklyObject.Workspace, 
+    modBlock: BlocklyObject.Block, 
+    allBlocks: {[id: string]: ToolBoxBlockItem[]} = {},
+    isScreenSupported = true;
 
 // variables declare end
 // helper functions start
 function setBaseVars(){
+    logger.info('Setting Base Varialbes...')
     Blockly = _Blockly,
     mainWorkspace = Blockly.getMainWorkspace(),
-    modBlock = _Blockly.getMainWorkspace().getBlocksByType('modBlock', false)[0];
+    modBlock = _Blockly.getMainWorkspace().getBlocksByType('modBlock', false)[0],
+    allBlocks = {};
+    (mainWorkspace as any).getToolbox().toolboxDef_.contents.forEach(element => {
+        if(element.kind === "SEP" || ["SEARCH RESULTS", "VARIABLES", "SUBROUTINES", "CONTROL ACTIONS"].includes(element.name)){
+            return
+        }
+        element.contents.forEach((block: ToolBoxBlockItem)  => {
+            if(block.kind === "LABEL"){
+                return
+            }
+            if(!(element.name in allBlocks)){
+                allBlocks[element.name] = [block]
+            } else {
+                allBlocks[element.name].push(block)
+            }
+        })
+
+
+    });
     modBlock.setOnChange(function (event: BlockMove) {
         if (event.type == Blockly.Events.BLOCK_MOVE) {
             if (mainWorkspace.getBlockById(event.blockId).type === "ruleBlock"){ 
@@ -55,9 +88,11 @@ function setBaseVars(){
         }
     });
     (window as any).modBlock = modBlock,
+    (window as any).allBlocks = allBlocks,
     (window as any).listBlocksInModBlock = listBlocksInModBlock,
     (window as any).addPane = addleftPluginPane,
     (window as any).handelExperienceRulesListing = handelExperienceRulesListing
+
 
 }
 
@@ -145,6 +180,7 @@ function centerAndSelectBlockByID(id: string) {
 // helper functions ends
 // sub plugins start
 function addleftPluginPane() {
+    logger.info('Adding left plugin pannel')
     const div = $('<div></div>').load(BF2042SDK.getUrl('html/leftPluginPane.html'), function () {
         $('.blocklyScrollbarHorizontal').after(div.html())
     })
@@ -160,6 +196,7 @@ function addleftPluginPane() {
 }
 
 function populateleftPagePlugins(){
+    logger.info('Starting Rules list plugin...')
     handelExperienceRulesListing()
 }
 
@@ -183,14 +220,58 @@ function handelExperienceRulesListing() {
     }
 }
 
+function searchWithCategoryPlugin(){
+    logger.info('loading searchWithCategory plugin....')
+    $('input.searchbar').remove().clone().appendTo('span.searchbarspan').on('keyup', function (event: JQuery.KeyUpEvent) {
+        setTimeout(
+            function(){
+               const ToolBox = ((mainWorkspace as any).getToolbox() as BlocklyObject.Toolbox);
+                const result = ToolBox.getToolboxItems()[0];
+                const input = ($('input.searchbar').val() as string).trim();
+                if(input.length){
+                    let flyoutContent = [],
+                        tempFlyoutContent = [];
+                    
+                    for (const [key, blocks] of Object.entries(allBlocks)) {
+                        tempFlyoutContent = []
+                        const label: FlyoutSectionLabel = {
+                            kind: "LABEL",
+                            text: key
+                        };
+                        tempFlyoutContent.push(label)
+                        blocks.forEach(block => {
+                            if(block.displayName.toLowerCase().includes(input.toLowerCase())){
+                                tempFlyoutContent.push(block)
+                            }
+                        })
+                        if(tempFlyoutContent.length > 1){
+                            flyoutContent = flyoutContent.concat(tempFlyoutContent)
+                        }
+                    }                    
+
+                    (result as any).updateFlyoutContents(flyoutContent);
+                    (result as any).show()
+                    ToolBox.setSelectedItem(result)
+                }else{
+                    (result as any).hide()
+                } 
+            }
+        ), 100
+    })
+}
+function reloadPlugins(){
+    logger.warn('DOM recreated.... reloading plugins...')
+    setBaseVars();
+    addleftPluginPane();
+    searchWithCategoryPlugin();
+}
 function main() {
     mutationObserverWrapper('app-rules', function (mutationList, observer) {
         for (const mutation of mutationList) {
             if (mutation.type === 'childList') {
                 if (document.getElementsByTagName('app-blockly').length) { // required to build dynamic html again as DOM is recreated
                     if (!isScreenSupported) {
-                        setBaseVars();
-                        addleftPluginPane();
+                        reloadPlugins();
                         isScreenSupported = true;
                     }
                 } else {
@@ -209,7 +290,9 @@ function loadSubPlugins() {
     showStartupBanner();
     addleftPluginPane();
     logger.info("coolness loaded");
+    searchWithCategoryPlugin();
     main();
+    (window as any).cool_plugin_loaded = true
 }
 (function () {
     // Load the script
