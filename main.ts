@@ -9,6 +9,7 @@
 // declaring types start
 import type * as BlocklyObject from './node_modules/blockly/core/blockly.js'
 import { BlockMove } from './node_modules/blockly/core/events/events_block_move.js'
+import Cookies  from 'js-cookie';
 type BlocklyRuntime = typeof BlocklyObject
 interface manifestObject {
     id: string,
@@ -89,11 +90,34 @@ function setBaseVars(){
     });
     (window as any).modBlock = modBlock,
     (window as any).allBlocks = allBlocks,
+    (window as any).testGRPC = testGRPC,
     (window as any).listBlocksInModBlock = listBlocksInModBlock,
     (window as any).addPane = addleftPluginPane,
     (window as any).handelExperienceRulesListing = handelExperienceRulesListing
 
 
+}
+async function testGRPC(){
+    import('bfportal-grpc').then(async (bfportalGRPC) => {
+        const communityGames = new  bfportalGRPC.CommunityGamesClient('https://kingston-prod-wgw-envoy.ops.dice.se', null);
+        const metadata = {
+            'x-dice-tenancy': 'prod_default-prod_default-kingston-common',
+            'x-gateway-session-id': Cookies.get('sessionId'), //todo: read from cookies
+            'x-grpc-web': '1',
+            'x-user-agent': 'grpc-web-javascript/0.1',
+        }
+        
+        const request = new bfportalGRPC.communitygames.GetPlaygroundRequest();
+        request.setPlaygroundid('0e2c9870-509b-11ed-af10-d3b271b3fd0a');
+        const response = await communityGames.getPlayground(request, metadata);
+        const modRules = response.getPlayground()?.getOriginalplayground()?.getModrules()?.getCompatiblerules()?.getRules();
+        if (modRules instanceof Uint8Array) {
+            console.log(new TextDecoder().decode(modRules))
+        }
+        const playgroundName = response.getPlayground()?.getOriginalplayground()?.getName
+        console.log(playgroundName);
+    
+    })
 }
 class Logger {
     pluginName: string;
@@ -197,7 +221,7 @@ function populateleftPagePlugins(){
     handelExperienceRulesListing()
 }
 function handelExperienceRulesListing() {
-    const rulesListContaier = $('.collapsedRuleContainer')
+    const rulesListContaier = $('.collapsedRuleInnerContainer')
     if (rulesListContaier.length) {
         listBlocksInModBlock().then(blocks => {
             rulesListContaier.children('.collapsedRule').remove()

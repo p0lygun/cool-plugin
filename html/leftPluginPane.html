@@ -1,8 +1,8 @@
 <style>
     :root {
         --leftPageMarginLeft: 0px;
-        --collapsed-rule-bg-image-url: '';
-        --left-arrow-svg-url: '';
+        --collapsed-rule-bg-image-url: ''  /* url('/static/images/rule_collapsed_no_name.svg') */;
+        --left-arrow-svg-url: '' /* url('/static/images/left_arrow.svg') */;
     }
     .leftPluginPageContainer {
         width: 210px;
@@ -52,13 +52,22 @@
     }
     .collapsedRuleOuterContainer{
         margin-top: 15px;
-        overflow-y: scroll;
+        display: flex;
         flex-direction: column;
-        row-gap: 5px;
+        row-gap: 15px;
         width: 100%;
+        flex-grow: 1;
+        min-height: 50%;
     }
     .collapsedRuleContainer {
         display: flex;
+        flex-direction: column;;        
+        overflow-y: scroll;
+
+    }
+    .collapsedRuleInnerContainer {
+        display: flex;
+        height: 100%;
         flex-direction: column;
         row-gap: 5px;
     }
@@ -70,13 +79,13 @@
         display: flex;
         flex-direction: row;
         width: 95%;
-        height: 45px;
+        min-height: 45px;
         margin: 0;
         padding-left: 17px;
         align-items: center;
         column-gap: 20px;
         white-space: pre;
-        overflow: hidden;
+        overflow-x: hidden;
     }
     .leftPluginContainer{
         display: flex;
@@ -101,19 +110,17 @@
 <div class="leftPluginContainer">
     <div class="leftPluginPageContainer blocklyNonSelectable">
         <div id="leftPluginPage">
-            <div id="leftPanecolaspeButton" onclick="toggleleftPane()">
-                <div class="iconclose close"></div>
-            </div>
+            <div id="leftPanecolaspeButton" onclick="toggleleftPane()"> <div class="iconclose close"></div> </div>
             <div class="collapsedRuleOuterContainer">
-                <div>Experience Rules List</div>
+                <div class="sectionLabel">Experience Rules List</div>
                 <div class="collapsedRuleContainer">
-
+                    <div class="collapsedRuleInnerContainer">
+                        <!-- <div class="collapsedRulea">
+                            <div> 1 </div> 
+                            <div> Rule </div>
+                        </div>                                                 -->
+                    </div>
                 </div>
-                <!-- <div class="collapsedRule">
-                    <div> 1 </div> 
-                    <div> Rule </div>
-                </div> -->
-
             </div>
         </div>
     </div>
