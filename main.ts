@@ -203,8 +203,8 @@ function populateleftPagePlugins(){
 function handelExperienceRulesListing() {
     const rulesListContaier = $('.collapsedRuleContainer')
     if (rulesListContaier.length) {
-        rulesListContaier.children('.collapsedRule').remove()
         listBlocksInModBlock().then(blocks => {
+            rulesListContaier.children('.collapsedRule').remove()
             blocks.forEach((block, index) => {
             const ruleCollapsedBlock = $('<div>', { 
                 class: 'collapsedRule',
