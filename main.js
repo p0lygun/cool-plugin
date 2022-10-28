@@ -12,7 +12,7 @@ let Blockly, mainWorkspace, modBlock, allBlocks = {}, isScreenSupported = true;
 // variables declare end
 // helper functions start
 function setBaseVars() {
-    logger.info('Setting Base Varialbes...');
+    logger.info('Setting Base variables...');
     Blockly = _Blockly,
         mainWorkspace = Blockly.getMainWorkspace(),
         modBlock = _Blockly.getMainWorkspace().getBlocksByType('modBlock', false)[0],

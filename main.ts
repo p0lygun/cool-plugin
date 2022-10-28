@@ -58,7 +58,7 @@ let Blockly: BlocklyRuntime,
 // variables declare end
 // helper functions start
 function setBaseVars(){
-    logger.info('Setting Base Varialbes...')
+    logger.info('Setting Base variables...')
     Blockly = _Blockly,
     mainWorkspace = Blockly.getMainWorkspace(),
     modBlock = _Blockly.getMainWorkspace().getBlocksByType('modBlock', false)[0],
@@ -95,7 +95,6 @@ function setBaseVars(){
 
 
 }
-
 class Logger {
     pluginName: string;
     showPluginName: boolean
@@ -134,7 +133,6 @@ function mutationObserverWrapper(target: string | Node, callback: MutationCallba
 function showStartupBanner() {
     logger.info("\r\n\r\n   _____            _   _____  _             _           \r\n  \/ ____|          | | |  __ \\| |           (_)          \r\n | |     ___   ___ | | | |__) | |_   _  __ _ _ _ __  ___ \r\n | |    \/ _ \\ \/ _ \\| | |  ___\/| | | | |\/ _` | | \'_ \\\/ __|\r\n | |___| (_) | (_) | | | |    | | |_| | (_| | | | | \\__ \\\r\n  \\_____\\___\/ \\___\/|_| |_|    |_|\\__,_|\\__, |_|_| |_|___\/\r\n                                        __\/ |            \r\n                                       |___\/             \r\n\n              Adding spice to your logic editor")
 }
-
 function waitForElm(selector: string) {
     return new Promise(resolve => {
         if (document.querySelector(selector)) {
@@ -194,12 +192,10 @@ function addleftPluginPane() {
     })
 
 }
-
 function populateleftPagePlugins(){
     logger.info('Starting Rules list plugin...')
     handelExperienceRulesListing()
 }
-
 function handelExperienceRulesListing() {
     const rulesListContaier = $('.collapsedRuleContainer')
     if (rulesListContaier.length) {
@@ -219,7 +215,6 @@ function handelExperienceRulesListing() {
         })})
     }
 }
-
 function searchWithCategoryPlugin(){
     logger.info('loading searchWithCategory plugin....')
     $('input.searchbar').remove().clone().appendTo('span.searchbarspan').on('keyup', function (event: JQuery.KeyUpEvent) {
@@ -281,8 +276,6 @@ function main() {
         }
     })
 }
-
-
 // sub plugins end
 // loaders start
 function loadSubPlugins() {
