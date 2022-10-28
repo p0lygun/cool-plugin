@@ -61,41 +61,42 @@ let Blockly: BlocklyRuntime,
 function setBaseVars(){
     logger.info('Setting Base variables...')
     Blockly = _Blockly,
-    mainWorkspace = Blockly.getMainWorkspace(),
-    modBlock = _Blockly.getMainWorkspace().getBlocksByType('modBlock', false)[0],
-    allBlocks = {};
-    (mainWorkspace as any).getToolbox().toolboxDef_.contents.forEach(element => {
-        if(element.kind === "SEP" || ["SEARCH RESULTS", "VARIABLES", "SUBROUTINES", "CONTROL ACTIONS"].includes(element.name)){
-            return
-        }
-        element.contents.forEach((block: ToolBoxBlockItem)  => {
-            if(block.kind === "LABEL"){
+    mainWorkspace = Blockly.getMainWorkspace() || undefined;
+    if(mainWorkspace){
+        modBlock = _Blockly.getMainWorkspace().getBlocksByType('modBlock', false)[0],
+        allBlocks = {};
+        (mainWorkspace as any).getToolbox().toolboxDef_.contents.forEach(element => {
+            if(element.kind === "SEP" || ["SEARCH RESULTS", "VARIABLES", "SUBROUTINES", "CONTROL ACTIONS"].includes(element.name)){
                 return
             }
-            if(!(element.name in allBlocks)){
-                allBlocks[element.name] = [block]
-            } else {
-                allBlocks[element.name].push(block)
+            element.contents.forEach((block: ToolBoxBlockItem)  => {
+                if(block.kind === "LABEL"){
+                    return
+                }
+                if(!(element.name in allBlocks)){
+                    allBlocks[element.name] = [block]
+                } else {
+                    allBlocks[element.name].push(block)
+                }
+            })
+    
+    
+        });
+        modBlock.setOnChange(function (event: BlockMove) {
+            if (event.type == Blockly.Events.BLOCK_MOVE) {
+                if (mainWorkspace.getBlockById(event.blockId).type === "ruleBlock"){ 
+                    handelExperienceRulesListing(); 
+                }  
             }
-        })
-
-
-    });
-    modBlock.setOnChange(function (event: BlockMove) {
-        if (event.type == Blockly.Events.BLOCK_MOVE) {
-            if (mainWorkspace.getBlockById(event.blockId).type === "ruleBlock"){ 
-                handelExperienceRulesListing(); 
-            }  
-        }
-    });
-    (window as any).modBlock = modBlock,
-    (window as any).allBlocks = allBlocks,
-    (window as any).testGRPC = testGRPC,
-    (window as any).listBlocksInModBlock = listBlocksInModBlock,
-    (window as any).addPane = addleftPluginPane,
-    (window as any).handelExperienceRulesListing = handelExperienceRulesListing
-
-
+        });
+        (window as any).modBlock = modBlock,
+        (window as any).allBlocks = allBlocks,
+        (window as any).listBlocksInModBlock = listBlocksInModBlock,
+        (window as any).addPane = addleftPluginPane,
+        (window as any).handelExperienceRulesListing = handelExperienceRulesListing    
+    
+    }
+    (window as any).testGRPC = testGRPC
 }
 async function testGRPC(){
     import('bfportal-grpc').then(async (bfportalGRPC) => {
@@ -281,33 +282,39 @@ function searchWithCategoryPlugin(){
 function reloadPlugins(){
     logger.warn('DOM recreated.... reloading plugins...')
     setBaseVars();
-    addleftPluginPane();
-    searchWithCategoryPlugin();
+    if(modBlock){
+        addleftPluginPane();
+        searchWithCategoryPlugin();    
+    }
 }
 function main() {
-    mutationObserverWrapper('app-rules', function (mutationList, observer) {
-        for (const mutation of mutationList) {
-            if (mutation.type === 'childList') {
-                if (document.getElementsByTagName('app-blockly').length) { // required to build dynamic html again as DOM is recreated
-                    if (!isScreenSupported) {
-                        reloadPlugins();
-                        isScreenSupported = true;
+    if(modBlock){
+        mutationObserverWrapper('app-rules', function (mutationList, observer) {
+            for (const mutation of mutationList) {
+                if (mutation.type === 'childList') {
+                    if (document.getElementsByTagName('app-blockly').length) { // required to build dynamic html again as DOM is recreated
+                        if (!isScreenSupported) {
+                            reloadPlugins();
+                            isScreenSupported = true;
+                        }
+                    } else {
+                        isScreenSupported = false;                    
                     }
-                } else {
-                    isScreenSupported = false;                    
                 }
             }
-        }
-    })
+        })    
+    }
 }
 // sub plugins end
 // loaders start
 function loadSubPlugins() {
     setBaseVars();
     showStartupBanner();
-    addleftPluginPane();
-    logger.info("coolness loaded");
-    searchWithCategoryPlugin();
+    if(mainWorkspace) {
+        addleftPluginPane();
+        searchWithCategoryPlugin();
+    }
+    logger.info("coolnesss loaded");
     main();
     (window as any).cool_plugin_loaded = true
 }

@@ -17,7 +17,7 @@ export default defineConfig({
       output: {
         entryFileNames: "[name].js",
         preserveModules:  false
-      }
+      },
     },
     chunkSizeWarningLimit: 600
   },
@@ -28,6 +28,6 @@ export default defineConfig({
       ],
       hook: "writeBundle"
 
-    }),
+    })
   ]
 })
