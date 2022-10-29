@@ -55,12 +55,14 @@ let Blockly: BlocklyRuntime = undefined,
     mainWorkspace: BlocklyObject.Workspace = undefined, 
     modBlock: BlocklyObject.Block = undefined, 
     allBlocks: {[id: string]: ToolBoxBlockItem[]} = {},
-    isScreenSupported = true;
+    blocklyMutationObserver: MutationObserver = undefined,
+    blockly_plugins_loaded = false;
+
 
 // variables declare end
 // helper functions start
-function setBaseVars(){
-    logger.info('Setting Base variables...')
+function setBlocklyBaseVars(){
+    logger.info('Setting Blockly Plugins Base variables...')
     Blockly = _Blockly,
     mainWorkspace = Blockly.getMainWorkspace() || undefined;
     if(mainWorkspace){
@@ -94,9 +96,13 @@ function setBaseVars(){
         (window as any).allBlocks = allBlocks,
         (window as any).listBlocksInModBlock = listBlocksInModBlock,
         (window as any).addPane = addleftPluginPane,
-        (window as any).handelExperienceRulesListing = handelExperienceRulesListing    
+        (window as any).handelExperienceRulesListing = handelExperienceRulesListing 
     
     }
+}
+
+function setGlobalPluginBaseVars(){
+    logger.info('Setting Global Plugins Base variables...');
     (window as any).testGRPC = testGRPC
 }
 async function testGRPC(){
@@ -280,51 +286,50 @@ function searchWithCategoryPlugin(){
         ), 100
     })
 }
-function reloadPlugins(){
-    logger.warn('DOM recreated.... reloading plugins...')
-    setBaseVars();
-    if(modBlock){
-        addleftPluginPane();
-        searchWithCategoryPlugin();    
-    }
-}
-function main() {
-    if(modBlock){
+
+function blocklyPluginMain() {
+    if(blocklyMutationObserver == undefined){
         mutationObserverWrapper('app-rules', function (mutationList, observer) {
+            blocklyMutationObserver = observer
             for (const mutation of mutationList) {
                 if (mutation.type === 'childList') {
-                    if (document.getElementsByTagName('app-blockly').length) { // required to build dynamic html again as DOM is recreated
-                        if (!isScreenSupported) {
-                            reloadPlugins();
-                            isScreenSupported = true;
+                    if (!document.getElementsByTagName('app-blockly').length) { // required to build dynamic html again as DOM is recreated
+                        if(blockly_plugins_loaded){
+                            blockly_plugins_loaded = false;
+                            observer.disconnect()
+                            blocklyMutationObserver = undefined;
+                            logger.warn('DOM recreated.... waiting to reload blockly specific plugins....')    
                         }
-                    } else {
-                        isScreenSupported = false;                    
                     }
                 }
             }
         })    
     }
+    blockly_plugins_loaded = true;
 }
 // sub plugins end
 // loaders start
 function loadSubPlugins() {
+        // blockly dependednt plugins
+        blockly_plugins_loaded = false;
+        showStartupBanner();
+        setGlobalPluginBaseVars()
         BF2042SDK.initializeWorkspace = function (){
-            try {
-                setBaseVars();
-                showStartupBanner();
-                if(mainWorkspace) {
-                    addleftPluginPane();
-                    searchWithCategoryPlugin();
-                }
-                logger.info("coolnesss loaded");
-                main();
-                (window as any).cool_plugin_loaded = true
-                BF2042SDK.initializeWorkspace = function (){};    
-            } catch (error) {
-                logger.critical("Failed loading plugin...")
+            if(!blockly_plugins_loaded){
+                try {
+                    setBlocklyBaseVars();
+                    if(mainWorkspace) {
+                        addleftPluginPane();
+                        searchWithCategoryPlugin();
+                    }
+                    blocklyPluginMain();
+                } catch (error) {
+                    logger.critical("Failed loading plugin...")
+                }    
             }
-        };        
+        };
+        logger.info("coolnesss loaded");
+        (window as any).cool_plugin_loaded = true
 }
 (function () {
     // Load the script
