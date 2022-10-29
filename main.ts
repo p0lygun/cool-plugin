@@ -23,7 +23,8 @@ interface manifestObject {
 interface PluginInfo {
     baseUrl: string,
     manifest: manifestObject,
-    getUrl(url: string): string
+    getUrl(url: string): string,
+    initializeWorkspace(): void
 
 }
 interface PluginObject {
@@ -50,9 +51,9 @@ declare var BF2042Portal: BF2042PortalRuntimeSDK, _Blockly: BlocklyRuntime;
 // variables declare start
 const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c');
 
-let Blockly: BlocklyRuntime, 
-    mainWorkspace: BlocklyObject.Workspace, 
-    modBlock: BlocklyObject.Block, 
+let Blockly: BlocklyRuntime = undefined, 
+    mainWorkspace: BlocklyObject.Workspace = undefined, 
+    modBlock: BlocklyObject.Block = undefined, 
     allBlocks: {[id: string]: ToolBoxBlockItem[]} = {},
     isScreenSupported = true;
 
@@ -308,15 +309,22 @@ function main() {
 // sub plugins end
 // loaders start
 function loadSubPlugins() {
-    setBaseVars();
-    showStartupBanner();
-    if(mainWorkspace) {
-        addleftPluginPane();
-        searchWithCategoryPlugin();
-    }
-    logger.info("coolnesss loaded");
-    main();
-    (window as any).cool_plugin_loaded = true
+        BF2042SDK.initializeWorkspace = function (){
+            try {
+                setBaseVars();
+                showStartupBanner();
+                if(mainWorkspace) {
+                    addleftPluginPane();
+                    searchWithCategoryPlugin();
+                }
+                logger.info("coolnesss loaded");
+                main();
+                (window as any).cool_plugin_loaded = true
+                BF2042SDK.initializeWorkspace = function (){};    
+            } catch (error) {
+                logger.critical("Failed loading plugin...")
+            }
+        };        
 }
 (function () {
     // Load the script
