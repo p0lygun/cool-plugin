@@ -87,7 +87,8 @@ function setBlocklyBaseVars(){
         });
         modBlock.setOnChange(function (event: BlockMove) {
             if (event.type == Blockly.Events.BLOCK_MOVE) {
-                if (mainWorkspace.getBlockById(event.blockId).type === "ruleBlock"){ 
+                const block = mainWorkspace.getBlockById(event.blockId)
+                if (block && block.type === "ruleBlock"){ 
                     handelExperienceRulesListing(); 
                 }  
             }
