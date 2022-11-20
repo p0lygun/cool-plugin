@@ -49,14 +49,18 @@ declare var BF2042Portal: BF2042PortalRuntimeSDK, _Blockly: BlocklyRuntime;
 
 // declaring types end
 // variables declare start
-const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c');
+const BF2042SDK = BF2042Portal.Plugins.getPlugin('1650e7b6-3676-4858-8c9c-95b9381b7f8c'),
+flyout_show_event = new CustomEvent("flyout_show_event",{detail: true}),
+flyout_hide_event = new CustomEvent("flyout_hide_event",{detail: false});
 
 let Blockly: BlocklyRuntime = undefined, 
     mainWorkspace: BlocklyObject.Workspace = undefined, 
     modBlock: BlocklyObject.Block = undefined, 
     allBlocks: {[id: string]: ToolBoxBlockItem[]} = {},
     blocklyMutationObserver: MutationObserver = undefined,
-    blockly_plugins_loaded = false;
+    blockly_plugins_loaded = false,
+    og_flyout_show = undefined,
+    leftIconContainer = undefined;
 
 
 // variables declare end
@@ -85,6 +89,9 @@ function setBlocklyBaseVars(){
     
     
         });
+        let flyout = (mainWorkspace as any).getFlyout()
+        og_flyout_show = flyout.setVisible;
+        flyout.setVisible = showflyout
         modBlock.setOnChange(function (event: BlockMove) {
             if (event.type == Blockly.Events.BLOCK_MOVE) {
                 const block = mainWorkspace.getBlockById(event.blockId)
@@ -105,6 +112,14 @@ function setBlocklyBaseVars(){
 function setGlobalPluginBaseVars(){
     logger.info('Setting Global Plugins Base variables...');
     (window as any).testGRPC = testGRPC
+
+    window.addEventListener("flyout_show_event", function(e: CustomEvent){
+        if (leftIconContainer) leftIconContainer.hide(0)
+    })
+    window.addEventListener("flyout_hide_event", function(e: CustomEvent){
+        if (leftIconContainer) leftIconContainer.show(0)
+    })
+
 }
 async function testGRPC(){
     import('bfportal-grpc').then(async (bfportalGRPC) => {
@@ -154,6 +169,11 @@ class Logger {
 
 }
 const logger = new Logger(BF2042SDK.manifest.name);
+
+function showflyout(show: boolean) {
+    og_flyout_show.call(this, show)
+    window.dispatchEvent(show ? flyout_show_event : flyout_hide_event)
+}
 
 function mutationObserverWrapper(target: string | Node, callback: MutationCallback) {
     const observer = new MutationObserver(callback),
@@ -222,7 +242,9 @@ function addleftPluginPane() {
         documentRoot.css('--collapsed-rule-bg-image-url', `url(${BF2042SDK.getUrl('static/images/rule_collapsed_no_name.svg')})`)
         documentRoot.css('--left-arrow-svg-url', `url(${BF2042SDK.getUrl('static/images/left_arrow.svg')})`)
         populateleftPagePlugins();
+        leftIconContainer = $('#leftPaneOpenIconContainer')
     })
+    
 
 }
 function populateleftPagePlugins(){
