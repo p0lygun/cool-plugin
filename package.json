@@ -13,7 +13,10 @@
   },
   "type": "module",
   "scripts": {
-    "compile": "tsc --skipLibCheck main.ts"
+    "compile": "tsc --skipLibCheck main.ts",
+    "bump_patch": "npm version patch --no-git-tag-version && git add -u && echo \"bump version to `npm pkg get version`\" | git commit -F -",
+    "bump_minor": "npm version patch --no-git-tag-version && git add -u && echo \"bump version to `npm pkg get version`\" | git commit -F -",
+    "bump_major": "npm version patch --no-git-tag-version && git add -u && echo \"bump version to `npm pkg get version`\" | git commit -F -"
   },
-  "version": "0.3.0"
+  "version": "0.3.2"
 }
