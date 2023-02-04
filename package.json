@@ -18,5 +18,5 @@
     "bump_minor": "npm version patch --no-git-tag-version && git add -u && echo \"bump version to `npm pkg get version`\" | git commit -F -",
     "bump_major": "npm version patch --no-git-tag-version && git add -u && echo \"bump version to `npm pkg get version`\" | git commit -F -"
   },
-  "version": "0.3.1"
+  "version": "0.3.2"
 }
