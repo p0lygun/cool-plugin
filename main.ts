@@ -43,6 +43,7 @@ export const logger = new Logger(BF2042SDK.manifest.name);
 
 import { leftPluginPaneManager } from "./lib/leftPaneManager";
 import { searchWithCategory } from "./plugins/searchWithCategory";
+import { menuInitlizer } from "./lib/menu";
 import { mutationObserverWrapper, showStartupBanner } from "./lib/helper";
 
 declare global {
@@ -51,8 +52,8 @@ declare global {
     allBlocks: { [id: string]: ToolBoxBlockItem[] };
     mainWorkspace: BlocklyObject.Workspace;
     Blockly: BlocklyRuntime;
+    menuInitlizer: typeof menuInitlizer;
   }
-  const logger: Logger;
 }
 
 declare var BF2042Portal: BF2042PortalRuntimeSDK, _Blockly: BlocklyRuntime;
@@ -110,6 +111,7 @@ function setBlocklyBaseVars() {
     (window.modBlock = modBlock),
       (window.allBlocks = allBlocks),
       (window.mainWorkspace = mainWorkspace);
+      (window.menuInitlizer = menuInitlizer)
     window.Blockly = Blockly;
   }
 }
