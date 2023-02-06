@@ -147,12 +147,12 @@
   <script>
     function removeCoordinateContainer(elm) {
       const element = $(elm);
-      const url = element
+      const key = element
         .siblings(".coordImgContainer")
-        .first().find("img").first().attr("src");
-      console.log(url);
-      if (window.coolPlugins.tess.images.hasOwnProperty(url)) {
-        delete window.coolPlugins.tess.images[url];
+        .first().find("img").first().attr("src").split("/").pop();
+
+      if (window.coolPlugins.tess.images.hasOwnProperty(key)) {
+        delete window.coolPlugins.tess.images[key];
       }
       return element.parent().remove();
     }
