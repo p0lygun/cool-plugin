@@ -128,7 +128,7 @@
         <p>Or paste Image</p>
         <div
           id="removeAllImages"
-          onclick="document.querySelectorAll('.coordinateContainer').forEach(e => e.remove());"
+          onclick="document.querySelectorAll('.coordinateContainer').forEach(e => e.remove());window.coolPlugins.tess.images = {}"
         >
           <p>Remove all images</p>
         </div>
