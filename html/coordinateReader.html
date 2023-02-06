@@ -42,6 +42,7 @@
     }
     .buttonArea {
       display: flex;
+      flex-grow: 1;
       column-gap: 20px;
     }
     .buttonArea .btn {
@@ -72,6 +73,30 @@
     .uploadImgLabel {
       background-color: #4b4c4d;
       cursor: pointer;
+    }
+    #tessLog {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      row-gap: 5px;
+      height: 33%;
+      width: 100%;
+      overflow: scroll;
+      background-color: black;
+    }
+    #tessLogSticky {
+      position: sticky;
+      top: 0;
+      color: white;
+      padding: 10px;
+      width: 100%;
+      background-color: rgb(20, 20, 20);
+    }
+    #tessLog p {
+      color: white;
+      padding-left: 10px;
+      width: 100%;
     }
   </style>
   <div class="coordReader-mainContainer">
@@ -113,5 +138,9 @@
         <div class="btn" id="btnAddBlocks">Create Blocks</div>
       </div>
     </div>
+    <div id="tessLog">
+      <p id="tessLogSticky">Tesseract Log</p>
+    </div>
+
   </div>
 </div>
