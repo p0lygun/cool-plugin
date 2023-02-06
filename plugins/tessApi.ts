@@ -1,8 +1,11 @@
-import Tesseract, { createWorker } from "tesseract.js";
+import Tesseract, { createWorker, createScheduler } from "tesseract.js";
 import { logger } from "../main";
 
 export async function createTessWoker() {
-  return await createWorker({ logger: (m) => console.log(m) });
+  return await createWorker({ logger: (m) => {
+    // console.log(m);    
+    $('#tessLog').append(`<p>${m.status} ${m.progress.toFixed(2)*100}%</p>`);
+  } });
 }
 
 export async function loadWorker(worker: Tesseract.Worker) {
@@ -10,9 +13,14 @@ export async function loadWorker(worker: Tesseract.Worker) {
   await worker.initialize("eng");
 }
 
+export function createTessScheduler() {
+  window.coolPlugins.tess.scheduler = createScheduler();
+}
+
+
 export async function doOCR(
   worker: Tesseract.Worker,
-  image: string | HTMLImageElement
+  image: string | HTMLImageElement | Blob | File
 ) {
   if (worker) {
     const {
@@ -23,3 +31,5 @@ export async function doOCR(
     logger.critical("Worker not initialized");
   }
 }
+
+export function batchOCR(scheduler: Tesseract.Scheduler, images: string[]) {}
