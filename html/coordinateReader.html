@@ -11,7 +11,7 @@
     #imageArea {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: start;
       height: 50%;
       overflow-y: scroll;
     }
@@ -26,6 +26,7 @@
     }
     .coordImgContainer {
       display: flex;
+      max-width: 60%;
     }
     .coordImgContainer img {
       width: 100%;
@@ -56,6 +57,14 @@
       flex-direction: row;
       align-items: center;
       row-gap: 10px;
+    }
+    #removeAllImages {
+      display: flex;
+      justify-content: center;
+      background-color: #902216;
+      border-radius: 7px;
+      padding: 5px;
+      cursor: pointer;
     }
     #uploadImg {
       display: none;
@@ -90,6 +99,12 @@
           </label>
         </div>
         <p>Or paste Image</p>
+        <div
+          id="removeAllImages"
+          onclick="document.querySelectorAll('.coordinateContainer').forEach(e => e.remove());"
+        >
+          <p>Remove all images</p>
+        </div>
       </div>
       <div class="btnContainer">
         <div class="btn" id="btnStartOCR">Read coordinates</div>
