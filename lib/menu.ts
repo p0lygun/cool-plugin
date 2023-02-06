@@ -1,5 +1,6 @@
 import { logger, BF2042SDK } from "../main";
 import { PlainDraggable } from "../static/js/plain-draggable.min.js";
+import { loadCoordinateReader } from "../plugins/coordinatReader";
 export function menuInitlizer() {
   logger.info("Initializing left plugins menu");
   const matTree = $("app-editor-menu mat-tree");
@@ -44,7 +45,9 @@ function makeLeftMenuPopup() {
       $(".red-close").on("click", function () {
         leftMenuPane.hide();
       });
-      leftMenuPane.show();
+      leftMenuPane.show(200, function(){
+        loadCoordinateReader();
+      });
     }
   });
 }

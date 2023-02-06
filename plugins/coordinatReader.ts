@@ -1,10 +1,9 @@
 import {
   createTessWoker,
   loadWorker,
-  createTessScheduler,
   doOCR,
 } from "./tessApi";
-import { BF2042SDK } from "../main";
+import { BF2042SDK, logger } from "../main";
 
 export const fetchAsBlob = (url: string) =>
   fetch(url).then((response) => response.blob());
@@ -56,21 +55,19 @@ export async function startTess() {
     window.coolPlugins.tess.worker = await createTessWoker();
     await loadWorker(window.coolPlugins.tess.worker);
   }
-  if(!window.coolPlugins.tess.scheduler){
-    createTessScheduler();
-  }
-  if (window.coolPlugins.tess.scheduler && window.coolPlugins.tess.worker) {
-    window.coolPlugins.tess.scheduler.addWorker(window.coolPlugins.tess.worker);
-  }
-  
-  
 
-  for(const key in window.coolPlugins.tess.images){
+  for (const key in window.coolPlugins.tess.images) {
     const blob = window.coolPlugins.tess.images[key];
-    const {data: {text}} = await window.coolPlugins.tess.worker.recognize(blob);
-    $(`#${key}-coord`).text(text);
+    const {
+      data: { text },
+    } = await window.coolPlugins.tess.worker.recognize(blob);
+    if (text.length > 0) {
+      $(`#${key}-coord`).text(text);
+    } else {
+      $(`#${key}-coord`).text("No coordinates found");
+      $(`#${key}`).attr("data-bad-image", "true");
+    }
   }
-    
 }
 export async function tessOCR(image: string | HTMLImageElement | Blob | File) {
   return await doOCR(window.coolPlugins.tess.worker, image);

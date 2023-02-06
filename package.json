@@ -8,6 +8,7 @@
   "dependencies": {
     "bfportal-grpc": "^1.0.10",
     "blockly": "^9.0.1",
+    "e": "^0.2.32",
     "js-cookie": "^3.0.1",
     "tesseract.js": "^4.0.2",
     "vite": "^3.2.1"

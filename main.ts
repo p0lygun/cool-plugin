@@ -44,7 +44,7 @@ export const logger = new Logger(BF2042SDK.manifest.name);
 import { leftPluginPaneManager } from "./lib/leftPaneManager";
 import { searchWithCategory } from "./plugins/searchWithCategory";
 import { menuInitlizer } from "./lib/menu";
-import { startTess, tessOCR } from "./plugins/coordinatReader.js";
+import { startTess, tessOCR, loadCoordinateReader } from "./plugins/coordinatReader.js";
 import { mutationObserverWrapper, showStartupBanner } from "./lib/helper";
 import Tesseract from "tesseract.js";
 
@@ -55,10 +55,16 @@ declare global {
     mainWorkspace: BlocklyObject.Workspace;
     Blockly: BlocklyRuntime;
     coolPlugins: {
-      tess: Tesseract.Worker;
+      tess: {
+        scheduler: Tesseract.Scheduler;
+        worker: Tesseract.Worker;
+        images: {[id: string]: File};
+      };
+
     };
     tessOCR: typeof tessOCR;
     startTess: typeof startTess;
+    loadCoordinateReader: typeof loadCoordinateReader;
   }
 }
 
@@ -119,8 +125,13 @@ function setBlocklyBaseVars() {
       (window.mainWorkspace = mainWorkspace);
       (window.startTess = startTess);
       (window.tessOCR = tessOCR);
+      (window.loadCoordinateReader = loadCoordinateReader);
       (window.coolPlugins) =  {
-        tess: undefined
+        tess: {
+          scheduler: undefined,
+          worker: undefined,
+          images: {},
+        }
       }
     window.Blockly = Blockly;
   }
