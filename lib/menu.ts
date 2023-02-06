@@ -25,10 +25,11 @@ export function menuInitlizer() {
 }
 
 function leftMenuButtonCallback() {
-  logger.info("Left Menu Button Clicked");
   leftMenuPopupHandler();
 }
-
+function leftMenuPopupHandler() {
+  $("#leftMenuPane").length === 0 ? makeLeftMenuPopup() : $("#leftMenuPane").show();
+}
 function makeLeftMenuPopup() {
   $.get(BF2042SDK.getUrl("html/leftMenu/popup.html"), function (data) {
     $("body").append(data);
@@ -47,6 +48,3 @@ function makeLeftMenuPopup() {
   });
 }
 
-function leftMenuPopupHandler() {
-  $("#leftMenuPane").length === 0 ? makeLeftMenuPopup() : $("#leftMenuPane").show();
-}
