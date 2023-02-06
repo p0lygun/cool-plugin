@@ -80,23 +80,25 @@
       flex-direction: column;
       align-items: start;
       row-gap: 5px;
-      height: 33%;
+      height: 150px;
       width: 100%;
       overflow: scroll;
       background-color: black;
     }
-    #tessLogSticky {
+    #tessLog p {
+      color: white;
+      padding-left: 10px;
+      font-size: small;
+      width: 100%;
+    }
+    #tessLog #tessLogSticky {
       position: sticky;
       top: 0;
       color: white;
       padding: 10px;
       width: 100%;
+      font-size: medium;
       background-color: rgb(20, 20, 20);
-    }
-    #tessLog p {
-      color: white;
-      padding-left: 10px;
-      width: 100%;
     }
   </style>
   <div class="coordReader-mainContainer">
@@ -141,6 +143,18 @@
     <div id="tessLog">
       <p id="tessLogSticky">Tesseract Log</p>
     </div>
-
   </div>
+  <script>
+    function removeCoordinateContainer(elm) {
+      const element = $(elm);
+      const url = element
+        .siblings(".coordImgContainer")
+        .first().find("img").first().attr("src");
+      console.log(url);
+      if (window.coolPlugins.tess.images.hasOwnProperty(url)) {
+        delete window.coolPlugins.tess.images[url];
+      }
+      return element.parent().remove();
+    }
+  </script>
 </div>
