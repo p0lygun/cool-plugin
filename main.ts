@@ -52,7 +52,6 @@ declare global {
     allBlocks: { [id: string]: ToolBoxBlockItem[] };
     mainWorkspace: BlocklyObject.Workspace;
     Blockly: BlocklyRuntime;
-    menuInitlizer: typeof menuInitlizer;
   }
 }
 
@@ -111,7 +110,6 @@ function setBlocklyBaseVars() {
     (window.modBlock = modBlock),
       (window.allBlocks = allBlocks),
       (window.mainWorkspace = mainWorkspace);
-      (window.menuInitlizer = menuInitlizer)
     window.Blockly = Blockly;
   }
 }
@@ -160,6 +158,7 @@ function loadSubPlugins() {
         setBlocklyBaseVars();
         if (mainWorkspace) {
           leftPluginPaneManager();
+          menuInitlizer();
           searchWithCategory();
         }
         blocklyPluginMain();

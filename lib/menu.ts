@@ -1,6 +1,7 @@
 import { logger, BF2042SDK } from "../main";
 import { PlainDraggable } from "../static/js/plain-draggable.min.js";
 export function menuInitlizer() {
+  logger.info("Initializing left plugins menu");
   const matTree = $("app-editor-menu mat-tree");
   if (matTree) {
     if ($("#cool_leftMenuButton").length === 0) {
