@@ -1,5 +1,7 @@
 import { createTessWoker, loadWorker, doOCR } from "./tessApi";
-import { BF2042SDK, logger } from "../main";
+import { BF2042SDK, logger, Blockly } from "../main";
+
+declare var Jimp: any;
 
 export const fetchAsBlob = (url: string) =>
   fetch(url).then((response) => response.blob());
@@ -77,8 +79,20 @@ function addVectorBlock(coords: Array<number>) {
 	</block>
   </xml>
   `;
-  const xmlDom = _Blockly.Xml.textToDom(blockXML);
-  _Blockly.Xml.domToWorkspace(xmlDom, _Blockly.getMainWorkspace());
+  const xmlDom = Blockly.Xml.textToDom(blockXML);
+  Blockly.Xml.domToWorkspace(xmlDom, Blockly.getMainWorkspace());
+}
+
+async function processImage(url: string) {
+  Jimp.read({
+    url: url,
+  }).then((image) => {
+    image.greyscale().contrast(0.5).invert().getBase64("image/png", (err, res) => {
+      return res;
+    });
+  }).catch( error => {
+    console.log(`Error loading image -> ${error}`);
+  });
 }
 
 export function extractCoordinates(text: string) {

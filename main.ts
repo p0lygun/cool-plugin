@@ -62,6 +62,7 @@ declare global {
       };
 
     };
+    _Blockly: BlocklyRuntime;
     tessOCR: typeof tessOCR;
     startTess: typeof startTess;
     loadCoordinateReader: typeof loadCoordinateReader;
@@ -75,8 +76,8 @@ const flyout_show_event = new CustomEvent("flyout_show_event", {
   }),
   flyout_hide_event = new CustomEvent("flyout_hide_event", { detail: false });
 
-let Blockly: BlocklyRuntime = undefined,
-  mainWorkspace: BlocklyObject.Workspace = undefined,
+export let Blockly: BlocklyRuntime = undefined;
+let  mainWorkspace: BlocklyObject.Workspace = undefined,
   modBlock: BlocklyObject.Block = undefined,
   allBlocks: { [id: string]: ToolBoxBlockItem[] } = {},
   blocklyMutationObserver: MutationObserver = undefined,
