@@ -22,21 +22,20 @@ export function loadCoordinateReader() {
       $("#leftMenuPane").find("#leftMenuContent").html(data);
     }).done(function () {
       $("#uploadImg").on("change", function (event: any) {
-        const fileUrl = URL.createObjectURL(event.target.files[0]);
-        if (!window.coolPlugins.tess.images.hasOwnProperty(fileUrl)) {
-          const uid = fileUrl.split("/").pop();
-          window.coolPlugins.tess.images[uid] = event.target.files[0];
+        const fileUrl = URL.createObjectURL(event.target.files[0]),
+        uid = fileUrl.split("/").pop();
+        if ($(`#${uid}`).length == 0) {
           $("#imageArea").append(
             `<div id="${uid}" class="coordinateContainer">
           <div class="coordImgContainer">
-            <img id="${uid}-img" src="${fileUrl}" alt="" />
+            <img class="coordImg" id="${uid}_img" src="${fileUrl}" alt="" />
           </div>
-          <div id="${uid}-coord" class="coordinates" contenteditable="true"></div>
+          <div id="${uid}_coord" class="coordinates" contenteditable="true"></div>
           <img
             src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
             alt=""
             width="15"
-            onclick="return removeCoordinateContainer(this);"
+            onclick="return $(this).parent().remove();"
             style="cursor: pointer;"
           />
         </div>`
@@ -50,7 +49,7 @@ export function loadCoordinateReader() {
         $(".coordinates").each(function (index, elm) {
           const element = $(elm);
           if (element.attr("data-bad-image") == "true") return;
-          addVectorBlock(extractCoordinates(element.text()))
+          addVectorBlock(extractCoordinates(element.text()));
         });
       });
     });
@@ -83,24 +82,13 @@ function addVectorBlock(coords: Array<number>) {
   Blockly.Xml.domToWorkspace(xmlDom, Blockly.getMainWorkspace());
 }
 
-async function processImage(url: string) {
-  Jimp.read({
-    url: url,
-  }).then((image) => {
-    image.greyscale().contrast(0.5).invert().getBase64("image/png", (err, res) => {
-      return res;
-    });
-  }).catch( error => {
-    console.log(`Error loading image -> ${error}`);
-  });
-}
 
 export function extractCoordinates(text: string) {
   const regex = new RegExp($("#regexFormat").val() as string, "ig");
   let matches: Array<any>;
   matches = regex.exec(text);
-  matches = matches.filter((item) => parseFloat(item)); // remove empty items
   if (matches) {
+    matches = matches.filter((item) => parseFloat(item)); // remove empty items
     return matches;
   }
   return null;
@@ -114,18 +102,34 @@ export async function startTess() {
     await loadWorker(window.coolPlugins.tess.worker);
   }
 
-  for (const key in window.coolPlugins.tess.images) {
-    const blob = window.coolPlugins.tess.images[key];
-    const {
-      data: { text },
-    } = await window.coolPlugins.tess.worker.recognize(blob);
-    if (text.length > 0) {
-      $(`#${key}-coord`).text(text);
-    } else {
-      $(`#${key}-coord`).text("No coordinates found");
-      $(`#${key}-coord`).attr("data-bad-image", "true");
-    }
-  }
+  $('.coordImg').each(function (index, elm) {
+    const element = $(elm);
+    const id = element.attr("id").split("_")[0];
+    Jimp.read({
+      url: String(element.attr("src")),
+    })
+      .then((image) => {
+        image
+          .greyscale()
+          .contrast(0.5)
+          .invert()
+          .getBase64("image/png", async (err, res) => {
+            const {
+              data: { text },
+            } = await window.coolPlugins.tess.worker.recognize(res);
+            const coord = $(`#${id}_coord`)
+            if (text.length > 0) {
+              coord.text(text);
+            } else {
+              coord.text("No coordinates found");
+              coord.attr("data-bad-image", "true");
+            }
+          });
+      })
+      .catch((error) => {
+        console.log(`Error loading image -> ${error}`);
+      });
+  });
 }
 export async function tessOCR(image: string | HTMLImageElement | Blob | File) {
   return await doOCR(window.coolPlugins.tess.worker, image);
