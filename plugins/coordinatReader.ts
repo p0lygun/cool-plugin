@@ -44,22 +44,48 @@ export function loadCoordinateReader() {
       $("#btnStartOCR").on("click", async function () {
         await startTess();
       });
-      $('#btnAddBlocks').on("click", function(){
-          $('.coordinates').each(function(index, elm){
-            const element = $(elm);
-            if(element.attr('data-bad-image') == "true") return;
-            console.log(extractCoordinates(element.text()));
-          })
-      })
+      $("#btnAddBlocks").on("click", function () {
+        $(".coordinates").each(function (index, elm) {
+          const element = $(elm);
+          if (element.attr("data-bad-image") == "true") return;
+          addVectorBlock(extractCoordinates(element.text()))
+        });
+      });
     });
   }
 }
 
+function addVectorBlock(coords: Array<number>) {
+  const blockXML = `
+  <xml xmlns="https://developers.google.com/blockly/xml">
+	<block  type="CreateVector" x="0" y="0">
+		<value name="VALUE-0">
+			<block type="Number">
+				<field name="NUM">${coords[0]}</field>
+			</block>
+		</value>
+		<value name="VALUE-1">
+			<block type="Number">
+				<field name="NUM">${coords[1]}</field>
+			</block>
+		</value>
+		<value name="VALUE-2">
+			<block type="Number">
+				<field name="NUM">${coords[2]}</field>
+			</block>
+		</value>
+	</block>
+  </xml>
+  `;
+  const xmlDom = _Blockly.Xml.textToDom(blockXML);
+  _Blockly.Xml.domToWorkspace(xmlDom, _Blockly.getMainWorkspace());
+}
+
 export function extractCoordinates(text: string) {
-  const regex = new RegExp(($('#regexFormat').val() as string), "ig");
+  const regex = new RegExp($("#regexFormat").val() as string, "ig");
   let matches: Array<any>;
   matches = regex.exec(text);
-  matches = matches.filter(item => parseFloat(item)) // remove empty items
+  matches = matches.filter((item) => parseFloat(item)); // remove empty items
   if (matches) {
     return matches;
   }
