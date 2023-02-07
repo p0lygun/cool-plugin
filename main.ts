@@ -58,7 +58,6 @@ declare global {
       tess: {
         scheduler: Tesseract.Scheduler;
         worker: Tesseract.Worker;
-        images: {[id: string]: File};
       };
 
     };
@@ -131,7 +130,6 @@ function setBlocklyBaseVars() {
         tess: {
           scheduler: undefined,
           worker: undefined,
-          images: {},
         }
       }
     window.Blockly = Blockly;
