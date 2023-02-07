@@ -43,7 +43,10 @@ export const logger = new Logger(BF2042SDK.manifest.name);
 
 import { leftPluginPaneManager } from "./lib/leftPaneManager";
 import { searchWithCategory } from "./plugins/searchWithCategory";
+import { menuInitlizer } from "./lib/menu";
+import { startTess, tessOCR, loadCoordinateReader } from "./plugins/coordinatReader.js";
 import { mutationObserverWrapper, showStartupBanner } from "./lib/helper";
+import Tesseract from "tesseract.js";
 
 declare global {
   interface Window {
@@ -51,8 +54,18 @@ declare global {
     allBlocks: { [id: string]: ToolBoxBlockItem[] };
     mainWorkspace: BlocklyObject.Workspace;
     Blockly: BlocklyRuntime;
+    coolPlugins: {
+      tess: {
+        scheduler: Tesseract.Scheduler;
+        worker: Tesseract.Worker;
+      };
+
+    };
+    _Blockly: BlocklyRuntime;
+    tessOCR: typeof tessOCR;
+    startTess: typeof startTess;
+    loadCoordinateReader: typeof loadCoordinateReader;
   }
-  const logger: Logger;
 }
 
 declare var BF2042Portal: BF2042PortalRuntimeSDK, _Blockly: BlocklyRuntime;
@@ -62,8 +75,8 @@ const flyout_show_event = new CustomEvent("flyout_show_event", {
   }),
   flyout_hide_event = new CustomEvent("flyout_hide_event", { detail: false });
 
-let Blockly: BlocklyRuntime = undefined,
-  mainWorkspace: BlocklyObject.Workspace = undefined,
+export let Blockly: BlocklyRuntime = undefined;
+let  mainWorkspace: BlocklyObject.Workspace = undefined,
   modBlock: BlocklyObject.Block = undefined,
   allBlocks: { [id: string]: ToolBoxBlockItem[] } = {},
   blocklyMutationObserver: MutationObserver = undefined,
@@ -110,6 +123,15 @@ function setBlocklyBaseVars() {
     (window.modBlock = modBlock),
       (window.allBlocks = allBlocks),
       (window.mainWorkspace = mainWorkspace);
+      (window.startTess = startTess);
+      (window.tessOCR = tessOCR);
+      (window.loadCoordinateReader = loadCoordinateReader);
+      (window.coolPlugins) =  {
+        tess: {
+          scheduler: undefined,
+          worker: undefined,
+        }
+      }
     window.Blockly = Blockly;
   }
 }
@@ -158,6 +180,7 @@ function loadSubPlugins() {
         setBlocklyBaseVars();
         if (mainWorkspace) {
           leftPluginPaneManager();
+          menuInitlizer();
           searchWithCategory();
         }
         blocklyPluginMain();

@@ -13,3 +13,5 @@ A plugin that makes your logic editor cool
 	- Search results are sorted by the category the block belongs too
 - Rules plugins list 
 	- adds a plugin to the left panel which shows all the rules in mod block, sorted based on its number
+- Coordinate Reader
+	- A plugin that allows you to upload images with coordinates and creates Vector Blocks from it

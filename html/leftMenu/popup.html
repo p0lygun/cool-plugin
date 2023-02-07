@@ -1,0 +1,71 @@
+<div id="leftMenuPane">
+  <style>
+    #leftMenuPane {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      margin: auto;
+      width: 50%;
+      aspect-ratio: 4/3;
+      background-color: rgb(31, 31, 31);
+      border-radius: 10px;
+      z-index: 100;
+    }
+    #leftMenuPane * {
+      margin: 0;
+    }
+    #leftMenuPaneTitlebar {
+      display: flex;
+      height: 30px;
+      width: 100%;
+      background-color: rgb(147, 147, 147);
+      border-radius: 10px 10px 0 0;
+    }
+    #leftMenuPaneTitlebar .draggable {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-grow: 1;
+    }
+    #leftMenuPaneTitlebar .draggable .draggable-content {
+      display: flex;
+      align-items: center;
+      width: fit-content;
+    }
+
+    #leftMenuPaneTitlebar .controlBox {
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      margin-right: 10px;
+      height: 100%;
+    }
+    #leftMenuPaneTitlebar .controlBox .red-close {
+      width: 15px;
+      aspect-ratio: 1/1;
+      background-color: rgb(255, 0, 0);
+      border-radius: 50%;
+    }
+    #leftMenuContent {
+      flex-grow: 1;
+      overflow-x: scroll;
+      padding: 10px;
+    }
+  </style>
+
+  <div id="leftMenuPaneTitlebar">
+    <div class="draggable">
+      <div class="draggable-content">
+        <p>Plugins Menu</p>
+      </div>
+    </div>
+    <div class="controlBox">
+      <div class="red-close"></div>
+    </div>
+  </div>
+  <div id="leftMenuContent"></div>
+</div>
