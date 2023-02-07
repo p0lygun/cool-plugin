@@ -1,4 +1,4 @@
-<div class="coordReader" style="height: 100%">
+<div id="cool_plugin_coord" class="coordReader" style="height: 100%">
   <style>
     .coordReader-mainContainer {
       display: flex;
@@ -100,6 +100,19 @@
       font-size: medium;
       background-color: rgb(20, 20, 20);
     }
+    .createBlocksContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      row-gap: 35px;
+    }
+
+    #regexFormat {
+      background-color: #454444;
+      border: 0;
+      color: white;
+      border-radius: 7px;
+    }
   </style>
   <div class="coordReader-mainContainer">
     <div id="imageArea">
@@ -136,8 +149,9 @@
       <div class="btnContainer">
         <div class="btn" id="btnStartOCR">Read coordinates</div>
       </div>
-      <div class="btnContainer">
+      <div class="createBlocksContainer btnContainer"> 
         <div class="btn" id="btnAddBlocks">Create Blocks</div>
+        <input type="text" id="regexFormat" value="X:([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))? Y:([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))? Z:([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))?"/>
       </div>
     </div>
     <div id="tessLog">

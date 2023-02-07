@@ -1,8 +1,4 @@
-import {
-  createTessWoker,
-  loadWorker,
-  doOCR,
-} from "./tessApi";
+import { createTessWoker, loadWorker, doOCR } from "./tessApi";
 import { BF2042SDK, logger } from "../main";
 
 export const fetchAsBlob = (url: string) =>
@@ -19,16 +15,17 @@ export const convertBlobToBase64 = (blob) =>
   });
 
 export function loadCoordinateReader() {
-  $.get(BF2042SDK.getUrl("html/coordinateReader.html"), function (data) {
-    $("#leftMenuPane").find("#leftMenuContent").html(data);
-  }).done(function () {
-    $("#uploadImg").on("change", function (event: any) {
-      const fileUrl = URL.createObjectURL(event.target.files[0]);
-      if (!window.coolPlugins.tess.images.hasOwnProperty(fileUrl)) {
-        const uid = fileUrl.split("/").pop();
-        window.coolPlugins.tess.images[uid] = event.target.files[0];
-        $("#imageArea").append(
-          `<div id="${uid}" class="coordinateContainer">
+  if ($("#cool_plugin_coord").length >= 0) {
+    $.get(BF2042SDK.getUrl("html/coordinateReader.html"), function (data) {
+      $("#leftMenuPane").find("#leftMenuContent").html(data);
+    }).done(function () {
+      $("#uploadImg").on("change", function (event: any) {
+        const fileUrl = URL.createObjectURL(event.target.files[0]);
+        if (!window.coolPlugins.tess.images.hasOwnProperty(fileUrl)) {
+          const uid = fileUrl.split("/").pop();
+          window.coolPlugins.tess.images[uid] = event.target.files[0];
+          $("#imageArea").append(
+            `<div id="${uid}" class="coordinateContainer">
           <div class="coordImgContainer">
             <img id="${uid}-img" src="${fileUrl}" alt="" />
           </div>
@@ -41,14 +38,35 @@ export function loadCoordinateReader() {
             style="cursor: pointer;"
           />
         </div>`
-        );
-      }
+          );
+        }
+      });
+      $("#btnStartOCR").on("click", async function () {
+        await startTess();
+      });
+      $('#btnAddBlocks').on("click", function(){
+          $('.coordinates').each(function(index, elm){
+            const element = $(elm);
+            if(element.attr('data-bad-image') == "true") return;
+            console.log(extractCoordinates(element.text()));
+          })
+      })
     });
-    $("#btnStartOCR").on("click", async function () {
-      await startTess();
-    });
-  });
+  }
 }
+
+export function extractCoordinates(text: string) {
+  const regex = new RegExp(($('#regexFormat').val() as string), "ig");
+  let matches: Array<any>;
+  matches = regex.exec(text);
+  matches = matches.filter(item => parseFloat(item)) // remove empty items
+  if (matches) {
+    return matches;
+  }
+  return null;
+}
+
+(window as any).extractCoordinates = extractCoordinates;
 
 export async function startTess() {
   if (!window.coolPlugins.tess.worker) {
@@ -65,7 +83,7 @@ export async function startTess() {
       $(`#${key}-coord`).text(text);
     } else {
       $(`#${key}-coord`).text("No coordinates found");
-      $(`#${key}`).attr("data-bad-image", "true");
+      $(`#${key}-coord`).attr("data-bad-image", "true");
     }
   }
 }
