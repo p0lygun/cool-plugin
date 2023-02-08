@@ -34,7 +34,7 @@ function leftMenuPopupHandler() {
 }
 function makeLeftMenuPopup() {
   $.get(BF2042SDK.getUrl("html/leftMenu/popup.html"), function (data) {
-    $("body").append(data);
+    $(".content").append(data);
   }).done(function () {
     const leftMenuPane = $("#leftMenuPane");
     if (leftMenuPane) {
