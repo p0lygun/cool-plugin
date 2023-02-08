@@ -42,6 +42,13 @@ export function loadCoordinateReader() {
           );
         }
       });
+      if(localStorage.getItem('cool_plugin_regexFormat') == null) {
+        localStorage.setItem('cool_plugin_regexFormat', 'X:([+-]?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]?\\d+))? Y:([+-]?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]?\\d+))? Z:([+-]?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]?\\d+))?');
+      }
+      $('#regexFormat').val(localStorage.getItem('cool_plugin_regexFormat') as string);
+      $('#regexFormat').on('change input', function () {
+        localStorage.setItem('cool_plugin_regexFormat', $(this).val() as string);
+      })
       $("#btnStartOCR").on("click", async function () {
         await startTess();
       });
