@@ -53,8 +53,7 @@ export function loadCoordinateReader() {
   }
 }
 
-document.addEventListener("paste", async (e) => {
-  e.preventDefault();
+document.addEventListener("paste", async function (e) {
   if ($("#leftMenuPane").css("visibility") != "visible") return;
   const clipboardItems =
     typeof navigator?.clipboard?.read === "function"
@@ -64,6 +63,7 @@ document.addEventListener("paste", async (e) => {
   for (const clipboardItem of clipboardItems) {
     let blob;
     if ((clipboardItem as any).type?.startsWith("image/")) {
+      e.preventDefault()
       // For files from `e.clipboardData.files`.
       blob = clipboardItem;
       // Do something with the blob.
@@ -73,6 +73,7 @@ document.addEventListener("paste", async (e) => {
       const imageTypes = (clipboardItem as any).types?.filter((type) =>
         type.startsWith("image/")
       );
+      if(imageTypes.length > 0) e.preventDefault();
       for (const imageType of imageTypes) {
         blob = await (clipboardItem as any).getType(imageType);
         // Do something with the blob.
