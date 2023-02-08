@@ -30,7 +30,9 @@ function leftMenuButtonCallback() {
   leftMenuPopupHandler();
 }
 function leftMenuPopupHandler() {
-  $("#leftMenuPane").length === 0 ? makeLeftMenuPopup() : $("#leftMenuPane").show();
+  $("#leftMenuPane").length === 0
+    ? makeLeftMenuPopup()
+    : $("#leftMenuPane").css("visibility", "visible");
 }
 function makeLeftMenuPopup() {
   $.get(BF2042SDK.getUrl("html/leftMenu/popup.html"), function (data) {
@@ -43,12 +45,11 @@ function makeLeftMenuPopup() {
         handle: leftMenuPane.find("#leftMenuPaneTitlebar .draggable")[0],
       });
       $(".red-close").on("click", function () {
-        leftMenuPane.hide();
+        leftMenuPane.css("visibility", "hidden");
       });
-      leftMenuPane.show(200, function(){
+      leftMenuPane.show(200, function () {
         loadCoordinateReader();
       });
     }
   });
 }
-
