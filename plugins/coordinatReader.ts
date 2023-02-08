@@ -22,33 +22,23 @@ export function loadCoordinateReader() {
       $("#leftMenuPane").find("#leftMenuContent").html(data);
     }).done(function () {
       $("#uploadImg").on("change", function (event: any) {
-        const fileUrl = URL.createObjectURL(event.target.files[0]),
-        uid = fileUrl.split("/").pop();
-        if ($(`#${uid}`).length == 0) {
-          $("#imageArea").append(
-            `<div id="${uid}" class="coordinateContainer">
-          <div class="coordImgContainer">
-            <img class="coordImg" id="${uid}_img" src="${fileUrl}" alt="" />
-          </div>
-          <div id="${uid}_coord" class="coordinates" contenteditable="true"></div>
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
-            alt=""
-            width="15"
-            onclick="return $(this).parent().remove();"
-            style="cursor: pointer;"
-          />
-        </div>`
-          );
-        }
+        addImageToRead(event.target.files[0]);
       });
-      if(localStorage.getItem('cool_plugin_regexFormat') == null) {
-        localStorage.setItem('cool_plugin_regexFormat', 'X:([+-]?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]?\\d+))? Y:([+-]?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]?\\d+))? Z:([+-]?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]?\\d+))?');
+      if (localStorage.getItem("cool_plugin_regexFormat") == null) {
+        localStorage.setItem(
+          "cool_plugin_regexFormat",
+          "X:([+-]?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]?\\d+))? Y:([+-]?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]?\\d+))? Z:([+-]?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]?\\d+))?"
+        );
       }
-      $('#regexFormat').val(localStorage.getItem('cool_plugin_regexFormat') as string);
-      $('#regexFormat').on('change input', function () {
-        localStorage.setItem('cool_plugin_regexFormat', $(this).val() as string);
-      })
+      $("#regexFormat").val(
+        localStorage.getItem("cool_plugin_regexFormat") as string
+      );
+      $("#regexFormat").on("change input", function () {
+        localStorage.setItem(
+          "cool_plugin_regexFormat",
+          $(this).val() as string
+        );
+      });
       $("#btnStartOCR").on("click", async function () {
         await startTess();
       });
@@ -63,6 +53,56 @@ export function loadCoordinateReader() {
   }
 }
 
+document.addEventListener("paste", async (e) => {
+  e.preventDefault();
+  if ($("#leftMenuPane").css("visibility") != "visible") return;
+  const clipboardItems =
+    typeof navigator?.clipboard?.read === "function"
+      ? await navigator.clipboard.read()
+      : e.clipboardData.files;
+
+  for (const clipboardItem of clipboardItems) {
+    let blob;
+    if ((clipboardItem as any).type?.startsWith("image/")) {
+      // For files from `e.clipboardData.files`.
+      blob = clipboardItem;
+      // Do something with the blob.
+      addImageToRead(blob);
+    } else {
+      // For files from `navigator.clipboard.read()`.
+      const imageTypes = (clipboardItem as any).types?.filter((type) =>
+        type.startsWith("image/")
+      );
+      for (const imageType of imageTypes) {
+        blob = await (clipboardItem as any).getType(imageType);
+        // Do something with the blob.
+        addImageToRead(blob);
+      }
+    }
+  }
+});
+
+function addImageToRead(image: File | Blob) {
+  const fileUrl = URL.createObjectURL(image),
+    uid = fileUrl.split("/").pop();
+  if ($(`#${uid}`).length == 0) {
+    $("#imageArea").append(
+      `<div id="${uid}" class="coordinateContainer">
+          <div class="coordImgContainer">
+            <img class="coordImg" id="${uid}_img" src="${fileUrl}" alt="" />
+          </div>
+          <div id="${uid}_coord" class="coordinates" contenteditable="true"></div>
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png"
+            alt=""
+            width="15"
+            onclick="return $(this).parent().remove();"
+            style="cursor: pointer;"
+          />
+        </div>`
+    );
+  }
+}
 function addVectorBlock(coords: Array<number>) {
   const blockXML = `
   <xml xmlns="https://developers.google.com/blockly/xml">
@@ -89,7 +129,6 @@ function addVectorBlock(coords: Array<number>) {
   Blockly.Xml.domToWorkspace(xmlDom, Blockly.getMainWorkspace());
 }
 
-
 export function extractCoordinates(text: string) {
   const regex = new RegExp($("#regexFormat").val() as string, "ig");
   let matches: Array<any>;
@@ -109,7 +148,7 @@ export async function startTess() {
     await loadWorker(window.coolPlugins.tess.worker);
   }
 
-  $('.coordImg').each(function (index, elm) {
+  $(".coordImg").each(function (index, elm) {
     const element = $(elm);
     const id = element.attr("id").split("_")[0];
     Jimp.read({
@@ -124,7 +163,7 @@ export async function startTess() {
             const {
               data: { text },
             } = await window.coolPlugins.tess.worker.recognize(res);
-            const coord = $(`#${id}_coord`)
+            const coord = $(`#${id}_coord`);
             if (text.length > 0) {
               coord.text(text);
             } else {
