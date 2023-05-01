@@ -1,7 +1,7 @@
 {
     "id": "1650e7b6-3676-4858-8c9c-95b9381b7f8c",
     "name": "Cool Plugin",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "description": "A Plugin that makes your logic editor cool",
     "author": "gala",
     "homepage": "https://github.com/p0lygun/cool-plugin",
