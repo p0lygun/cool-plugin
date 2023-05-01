@@ -170,29 +170,26 @@ function blocklyPluginMain() {
 }
 
 function loadSubPlugins() {
-  // blockly dependednt plugins
-  blockly_plugins_loaded = false;
-  showStartupBanner();
   setGlobalPluginBaseVars();
-  BF2042SDK.initializeWorkspace = function () {
-    if (!blockly_plugins_loaded) {
-      try {
-        setBlocklyBaseVars();
-        if (mainWorkspace) {
-          leftPluginPaneManager();
-          menuInitlizer();
-          searchWithCategory();
-        }
-        blocklyPluginMain();
-      } catch (error) {
-        logger.critical("Failed loading plugin... " + error);
+  if (!blockly_plugins_loaded) {
+    try {
+      setBlocklyBaseVars();
+      if (mainWorkspace) {
+        leftPluginPaneManager();
+        menuInitlizer();
+        searchWithCategory();
       }
+      blocklyPluginMain();
+    } catch (error) {
+      logger.critical("Failed loading plugin... " + error);
     }
-  };
+  }
   logger.info("coolnesss loaded");
   (window as any).cool_plugin_loaded = true;
+
 }
-(function () {
+
+function loadJquery() {
   // Load the script
   if (typeof (window as any).jQuery === "undefined") {
     const script = document.createElement("script");
@@ -200,12 +197,20 @@ function loadSubPlugins() {
       "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js";
     script.type = "text/javascript";
     script.addEventListener("load", () => {
-      console.log(`jQuery ${$.fn.jquery} has been loaded successfully!`);
+      logger.info(`jQuery ${$.fn.jquery} has been loaded successfully!`);
       loadSubPlugins();
     });
     document.head.appendChild(script);
-  } else {
-    loadSubPlugins();
   }
-})();
-// loaders end
+  showStartupBanner();
+}
+
+BF2042SDK.initializeWorkspace = function () {
+  if(typeof (window as any).jQuery === "undefined") 
+    loadJquery();
+  else
+    loadSubPlugins();
+
+  blockly_plugins_loaded = false;
+};
+
