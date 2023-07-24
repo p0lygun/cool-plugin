@@ -5,7 +5,7 @@ A plugin that makes your logic editor cool
 - install the main extenstion
 	- https://github.com/LennardF1989/BF2042-Portal-Extensions#installation
 - add plugin via
-	- https://stilllearning.tech/cool-plugin/manifest.json
+	- https://p0lygun.github.io/cool-plugin/manifest.json
 
 
 ### This plugins comes with several sub-plugins
